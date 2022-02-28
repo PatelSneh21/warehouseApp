@@ -30,7 +30,7 @@ Master_Cartons = Base.classes.master_cartons
 
 @app.route('/')
 def index():
-    new_item = Items(item_id="od", item_name="pipe", model_number="123abc", item_price=49.99, quantity )
+    new_item = Items(item_id="od", item_name="pipe", model_number="123abc", item_price=49.99, quantity="5")
     db.session.add(new_item)
     db.session.commit()
     #results = db.session.query(Product).all()

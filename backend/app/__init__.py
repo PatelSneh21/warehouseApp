@@ -5,7 +5,6 @@ from flask_cors import CORS
 
 # Import routing, models and Start the App
 from app import views
-
 app = Flask(__name__)
 app.debug = True
 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
@@ -26,6 +25,7 @@ def check(email): #Allows us to determine whether or not a given string is a val
 #Use this route to test whether or not the backend is running
 @app.route('/status', methods=['GET'])
 def status():
+	print("HELLO")
 	return Response(status = 200) 
 
 

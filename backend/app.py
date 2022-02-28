@@ -1,7 +1,11 @@
 #This file will import the app and start the development server. 
-from app import app
-#The below is an example of how to get environment variables. 
-#API keys, password hash salts, etc will be stored as an environment variable and not uploaded to github.
-#print(os.environ['PASSWORD_SALT'])
+from flask import Flask, Response
+from app import app, db
+
+#Application run stuff, in debug mode for now. TURN DEBUG MODE OFF PRIOR TO PRODUCTION, MAKES APP VULNERABLE 
+if __name__ == '__main__':
+	app.debug=True
+	app.run()
+
 
 

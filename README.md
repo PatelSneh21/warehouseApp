@@ -6,3 +6,11 @@ Frameworks: Flask backend with a React.js frontend
 
 CS 4278 Project
 Group 7: Sneh Patel, Alex Zhang, Justin Law
+
+To start virtual env: source venv/bin/activate
+
+
+To start flask app:
+export FLASK_APP=app.py
+sudo flask run
+	

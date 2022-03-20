@@ -4,17 +4,23 @@ from flask_sqlalchemy import SQLAlchemy
 from numpy import quantile
 from sqlalchemy.ext.automap import automap_base
 
-app = Flask(__name__)
-
-app.config['SQL_DATABASE_URI'] = ""
-
-db = SQLAlchemy(app)
-
-##schema models
 #rack_info = db.Table('rack_info', db.metadata, autoload=True, autoload_with = db.engine)
 
 Base = automap_base()
 Base.prepare(db.engine, reflect=True)
+
+#Database Setup:
+
+class Rack_Info(db.Model):
+	rack_id = db.Column(db.Integer, primary_key = True)
+	rack_location = db.Column(db.String(120), unique = True, nullable = False)
+
+
+class Bin_Info(db.Model):
+	bin_id = db.Column(db.Integer, primary_key = True)
+	bin_location = db.Column(db.String(120), unique = True, nullable = False)
+	bin_height = db.Column(db.Integer)
+	rack_info_rack_id = db.Column(db.Integer, db.ForeignKey(rack_info.rack_id))
 
 #pulls models by scanning db
 Rack_Info = Base.classes.rack_info

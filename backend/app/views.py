@@ -2,10 +2,10 @@
 # App modules
 from flask import Blueprint, redirect, url_for, render_template, request, make_response, session, Response, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
+
 #from app.models import User
 
 views = Blueprint("views", __name__)
-
 
 def check(email): #Allows us to determine whether or not a given string is a valid email or not 
     if(re.match(regex, email)):
@@ -15,44 +15,7 @@ def check(email): #Allows us to determine whether or not a given string is a val
 
 @views.route("/getStatus")
 def getStatus(): 
-	return "Hello"
-
-
-#Signup a new user
-@views.route('/api/signup', methods =['GET', 'POST'])
-def signup():
-	if "email" in session:
-		return Response(status = 300) #User is already logged in, Redirect to Dashboard
-	#Handles being POSTed user data from the form
-	if request.method == 'POST':
-		email = request.json["email"]
-		email = email.lower()
-		firstName = request.json["firstName"]
-		lastName = request.json["lastName"]
-		password = request.json["password"]
-
-		#Input validations to check the data received from the frontend, for the time being generic error 404 is being returned
-		if (email == "" or firstName == "" or lastName == "" or password == ""): #No field can be left blank
-			return Response(status=404)
-		if not check(email): #The provided email should be a valid email 
-			return Response(status=404)
-
-		password_hashed = generate_password_hash(password + os.environ['PASSWORD_SALT'], method = 'sha256')
-		userType = request.json["userTpe"]
-		if (User.query.filter_by(email = email).first() is None):
-
-			newUser = User(
-				email = email, password_hashed = password_hashed, firstName = firstName, lastName = lastName, userType = userType)
-			db.session.add(newUser)
-			db.session.commit()	
-			session["email"] = email  #Log the user in
-			return Response(status = 202)  #Return a status code 202
-
-		return Response(status = 404) #Email already exists
-
-	#Our GET Request
-	return Response(status = 200)
-	
+	return "Working"
 
 #Login a user
 @views.route('/api/login', methods = ['POST', 'GET'])

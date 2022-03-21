@@ -12,24 +12,23 @@ function LoginForm({ Login, error }) {
         Login(details);
     }
   return (
-    <form onSubmit = {submitHandler}>
-        <div className="inner">
-            <img src={Logo} />
-           
-            {(error != "") ? ( <div className="error"></div>) : ""}
-            
-            <div className="group">
-                <label htmlFor="email">Email:</label>
-                <input type="email" name="email" id="email" onChange={event => setDetails({...details, email: event.target.value})} value={details.email}/>
+      <div className='form-wrapper'>
+        <form onSubmit = {submitHandler}>
+            <div className="form-inner">
+                <img src={Logo} />
+                <div className="form-group">
+                    <label htmlFor="email">Email:</label>
+                    <input type="email" name="email" id="email" onChange={event => setDetails({...details, email: event.target.value})} value={details.email}/>
+                </div>
+                <div className="form-group">
+                    <label htmlFor="password">Password:</label>
+                    <input type="password" name="password" id="password" onChange={event => setDetails({...details, password: event.target.value})} value={details.password}/>
+                </div>
+            {(error != "") ? ( <div className="error">Incorrect username or pass</div>) : ""}
+                <input type="submit" value="LOGIN"/>
             </div>
-            <div className="group">
-                <label htmlFor="password">Password:</label>
-                <input type="password" name="password" id="password" onChange={event => setDetails({...details, password: event.target.value})} value={details.password}/>
-            </div>
-            <input type="submit" value="LOGIN"/>
-        </div>
-        
-    </form>
+        </form>
+      </div>
   )
 }
 

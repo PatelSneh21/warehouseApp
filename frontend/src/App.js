@@ -2,15 +2,17 @@ import React, { useState } from 'react';
 import LoginForm from './components/LoginForm';
 import {
   BrowserRouter as Router,
+  Link,
   Route,
-  Redirect,
+  useNavigate,
   Switch,
 } from "react-router-dom";
+import "./App.css"
 
 function App() {
   const adminUser = {
     email: "admin@admin.com",
-    password: "admin123"
+    password: "34rferfwvgg"
   }
 
   const [user, setUser] = useState({name: "", email: ""});
@@ -35,12 +37,18 @@ function App() {
     console.log("Logout");
   }
 
+  let navigate = useNavigate();
+
+
   return (
     <div className="App">
       {(user.email != "") ? (
         <div className="welcome">
-          <h2> Welcome, <span>{user.email}</span></h2>
-          <button>Logout</button>
+          {/* <Home user = {user} /> */}
+          {navigate("/home", {state: {user: user}})}
+
+          
+
         </div>
       ) : (
         <LoginForm Login={Login} error={error}/>

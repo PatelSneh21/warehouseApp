@@ -7,9 +7,9 @@ function LeftNav(props) {
 
     const {state} = useLocation();
 
-    const regularColor = {backgroundColor: 'rgb(36, 105, 255)'};
+    // const regularColor = {backgroundColor: 'rgb(36, 105, 255)'};
 
-    const activeColor = {backgroundColor: 'rgb(126, 165, 250)'};
+    // const activeColor = {backgroundColor: 'rgb(126, 165, 250)'};
     console.log(state);
     return (
         <div className="left-rect">

@@ -18,11 +18,29 @@ function App() {
   const [user, setUser] = useState({name: "", email: ""});
   const [error, setError] = useState("");
 
+  function Authenticate(userInfo) {
+    // fetch("/api/login", {
+    //   method:"POST",
+    //   cache: "no-cache",
+    //   headers:{
+    //       "content_type":"application/json",
+    //   },
+    //   body:JSON.stringify(userInfo)
+    // }).then(response => {
+    //   return response.status === 200
+    // })
+    console.log(JSON.stringify(userInfo));
+    return true;
+  }
+
+
   //login function
   const Login = details => {
     console.log(details);
+    
 
-    if (details.email == adminUser.email && details.password == adminUser.password){
+
+    if (Authenticate(details)){
       console.log("Logged in");
       setUser({
         email: details.email
@@ -46,7 +64,6 @@ function App() {
         <div className="welcome">
           {/* <Home user = {user} /> */}
           {navigate("/home", {state: {user: user}})}
-
           
 
         </div>

@@ -10,24 +10,19 @@ import {
   useLocation
 } from "react-router-dom";
 import LeftNav from './LeftNav';
+import TopBar from './TopBar';
 
 
 function Home(props) {
-
-  const {state} = useLocation();
-  console.log(state);
   return (
     <div>
-
-
       <div className="home-container">
         <div className="sidebar">
           <LeftNav />
-          
         </div>
         <div className="home-content">
-          <h1>Bluevue Warehouse Manager</h1>
-          <h2> Welcome, <span>{state.user.email}</span></h2>
+          <TopBar />
+          
             
             <div className="content">
               <Outlet />

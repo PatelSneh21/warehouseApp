@@ -9,8 +9,13 @@ Group 7: Sneh Patel, Alex Zhang, Justin Law
 
 To start virtual env: source venv/bin/activate
 
+To install dependencies for react frontend:
+`npm install`
 
 To start flask app:
 export FLASK_APP=app.py
 sudo flask run
-	
+
+
+To start frontend:
+`npm run start`

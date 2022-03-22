@@ -7,13 +7,12 @@ import {
   Routes,
   Route,
 } from "react-router-dom";
+import 'bootstrap/dist/css/bootstrap.css';
 import reportWebVitals from './reportWebVitals';
-import HistorySummary from './components/HistorySummary';
-import SalesSummary from './components/SalesSummary';
 import Home from './components/Home';
 import HomeContent from './components/HomeContent';
 import HistoryPage from './components/HistoryPage';
-import SalesPage from './components/SalesPage';
+import InventoryPage from './components/InventoryPage';
 
 ReactDOM.render(
   <BrowserRouter>
@@ -24,7 +23,7 @@ ReactDOM.render(
       <Route path="home" element={<Home />}>
         <Route index element={<HomeContent />} />
         <Route path="history" element={<HistoryPage />} />
-        <Route path="sales" element={<SalesPage />} />
+        <Route path="inventory" element={<InventoryPage />} />
       </Route>
 
       {/* <Route path="home" element={<Home />} />

@@ -19,7 +19,7 @@ function App() {
   const [error, setError] = useState("");
 
   function Authenticate(userInfo) {
-    // fetch("/api/login", {
+    // fetch("http://localhost:5000/api/login", {
     //   method:"POST",
     //   cache: "no-cache",
     //   headers:{

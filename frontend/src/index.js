@@ -13,6 +13,10 @@ import Home from './components/Home';
 import HomeContent from './components/HomeContent';
 import HistoryPage from './components/HistoryPage';
 import InventoryPage from './components/InventoryPage';
+import 'bootstrap';
+import 'bootstrap/dist/js/bootstrap.js';
+import $ from 'jquery';
+import Popper from 'popper.js';
 
 ReactDOM.render(
   <BrowserRouter>

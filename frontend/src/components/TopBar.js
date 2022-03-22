@@ -3,6 +3,8 @@ import {
     useLocation
   } from "react-router-dom";
   import { FaUserCircle, FaBell } from 'react-icons/fa';
+  import Dropdown from 'react-bootstrap/Dropdown'
+  import DropdownButton from 'react-bootstrap/DropdownButton'
 
 
 function TopBar() {
@@ -16,9 +18,20 @@ function TopBar() {
         </div>
       
         <div class="top-user">
-        <FaBell className='user-icon' />
-        <FaUserCircle className='user-icon' /> {state.user.email}
+        
+        <Dropdown>
+          <Dropdown.Toggle variant="" id="">
+            <FaBell className='user-icon' />
+            <FaUserCircle className='user-icon' /> {state.user.email}
+          </Dropdown.Toggle>
+
+          <Dropdown.Menu>
+            <Dropdown.Item href="#/action-1">Log Out</Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
         </div>
+
+        
     </div>
 
 

@@ -49,7 +49,7 @@ function itemList(collection) {
   return (
     <div className='inventory-wrapper'>
         <h2>Inventory</h2>
-        <div className='home-card'>
+        <div className='search-card'>
           <h5>What are you looking for?</h5>
           <Form>
             <Row>
@@ -66,7 +66,7 @@ function itemList(collection) {
           </Form>
         </div>
 
-        <div className="home-card">
+        <div className="result-card">
             <h2>Item Summary</h2>
             <Table striped borderless hover >
             <thead>

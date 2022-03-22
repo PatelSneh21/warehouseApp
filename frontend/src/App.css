@@ -268,10 +268,48 @@
   transition: 0.3s;
   padding: 20px 20px;
   border-radius: 25px;
-  height: auto;
+  height: 300px;
  }
  
  .home-card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+/* TODO Refactor different card types reduce code cloning */
+
+.search-card {
+  align-items: center;
+  justify-content: center;
+  display: block;
+  /* width: 50%; */
+  /* margin: 50px; */
+  margin-top: 20px;
+  background-color: rgb(247, 247, 247);
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+  padding: 20px 20px;
+  border-radius: 25px;
+  height: auto;
+}
+.search-card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+.result-card {
+  align-items: center;
+  justify-content: center;
+  display: block;
+  /* width: 50%; */
+  /* margin: 50px; */
+  margin-top: 20px;
+  background-color: rgb(247, 247, 247);
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+  padding: 20px 20px;
+  border-radius: 25px;
+  height: auto;
+}
+.result-card:hover {
   box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
 }
  /* End card styling */

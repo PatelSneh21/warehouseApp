@@ -22,7 +22,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:@127.0.0.1:3306/mydb"
 app.config['SECRET_KEY'] = os.environ.get('PASSWORD_SALT')
 
 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-salt = os.environ.get('PASSWORD_SALT')
+salt = o`s.environ.get('PASSWORD_SALT')
 
 #Database Setup:
 db = SQLAlchemy(app) # flask-sqlalchemy
@@ -62,7 +62,7 @@ class Items(db.Model):
 	__tablename__ = 'Items'
 	item_id = db.Column(db.Integer, primary_key = True)
 	item_name = db.Column(db.String(120), unique = True, nullable = False)
-	model_number = db.Column(db.Integer)
+	model_number = db.Column(db.String(120))
 	item_price = db.Column(db.Float)
 	quantity = db.Column(db.Integer)
 	bin_location = db.relationship('Bin', secondary = itemLocations, backref = db.backref(('itemInBin'), lazy = 'dynamic'))
@@ -119,14 +119,18 @@ class Master_Cartons(db.Model):
 app.register_blueprint(views.views)
 
 
-#Use this route to test whther or not the backend is running
+# Route: /status, Used to check whether or not the flask webserver is running
+# Method: GET
+# Expected Response: HTTP Status 200
 @app.route('/status', methods=['GET'])
 def status():
 	print("Application Server Running")
 	return Response(status = 200) 
 
 
-#Signup a new user
+# Route: /api/signup, Used to sign up a user into the system
+# Method: GET
+# Expected Response: User added to database, user added to session, status code 202 (Created object)
 @app.route('/api/signup', methods =['GET', 'POST'])
 def signup():
 	#Handles being POSTed user data from the form
@@ -155,6 +159,9 @@ def signup():
 		return Response(status = 404) #Username already exists
 
 
+# Route: /api/login, Used to login an existing user 
+# Method: GET
+# Expected Response: User added to session, HTTP Response Code 200
 @app.route('/api/login', methods = ['POST', 'GET'])
 def login():
 	if "username" in session:
@@ -181,7 +188,10 @@ def login():
 	#Our GET Request so that users can access the login page
 	return Response(status = 200)
 
-#Log a user out
+
+# Route: /api/logout
+# Method: GET
+# Expected Response: Remmove a user from the flask-session, HTTP Status 200
 @app.route('/api/logout')
 def logout():
 	if "username" in session is None:
@@ -191,6 +201,9 @@ def logout():
 		return Response(status = 200) 
 
 
+# Route: /api/isLoggedIn, Return user data if a user is logged in from a session
+# Method: GET
+# Expected Response: User name and type, HTTP Status 200
 @app.route('/api/isLoggedIn', methods = ['GET'])
 def isLoggedIn():
 	user = {}
@@ -205,6 +218,14 @@ def isLoggedIn():
 		return Response(status=404)
 
 
+# Route: /api/addItem, Add an item to the database
+# Method: POST
+# Requested Data:
+#	item_name: String
+#	model_number: String
+#	item_price: Decimal
+#	quantity: Integer
+# Expected Response: HTTP Status 200
 @app.route('/api/addItem', methods = ['POST'])
 def addItem():
 	if "username" in session is None:
@@ -225,6 +246,9 @@ def addItem():
 		return Response(status=200)
 
 
+# Route: /api/admin/allUsers, Get a list of users in the system
+# Method: GET
+# Expected Response: HTTP Status 200
 @app.route('/api/admin/allUsers')
 def allUsers(): 
 	if ("username" in session):
@@ -243,6 +267,9 @@ def allUsers():
 		return Response(status=404)
 
 
+# Route: /api/admin/allItems, Get a list of items in the system
+# Method: GET
+# Expected Response: HTTP Status 200
 @app.route('/api/allItems')
 def allItems(): 
 	if ("username" in session):
@@ -254,11 +281,18 @@ def allItems():
 				'Item Model Num': item.model_number,
 				'Item Quantity' : item.quantity
 				}) 
-		return items, 200
+		return {
+			"items" : items
+		}, 200
+
 	else:
 		return Response(status=404)
 
 
+# Route: /api/findItem/<model_num>, Get a list of locations of items in the system
+# Method: GET
+# Param: model_num
+# Expected Response: HTTP Status 200
 @app.route('/api/findItem/<model_num>')
 def findItem(model_num):
 	if ("username" in session):
@@ -272,11 +306,20 @@ def findItem(model_num):
 				"bin_id" : curr.bin_id,
 				"bin_location" : curr.bin_location
 				})
-		return binsFound, 200
+		return { 
+			"binsFound" : binsFound
+			}, 200
 	else: 
 		return Response(status=404) 
 
 
+# Route: /api/addMasterCarton, Add a MasterCarton to the database
+# Method: POST
+# Requested Data:
+#	carton_size: Integer
+#	num_items: Integer
+#	item_id: Integer
+# Expected Response: HTTP Status 200
 @app.route('/api/addMasterCarton', methods = ['POST'])
 def addMasterCarton():
 	if "username" in session is None:
@@ -293,6 +336,13 @@ def addMasterCarton():
 		return Response(status=200)
 
 
+# Route: /api/withdraw, Remove a quantity of items from the database
+# Method: POST
+# Requested Data:
+#	item_id: Integer
+#	quantity: Integer
+#	item_id: Integer
+# Expected Response: HTTP Status 200
 @app.route('/api/withdraw', methods = ['POST'])
 def withdraw(item_id): 
 	if ("username" in session):
@@ -300,7 +350,6 @@ def withdraw(item_id):
 
 		item_id = request.json["item_id"]
 		quantity = request.json["quantity"]
-		item_id = request.json['item_id']
 
 		MC = Master_Cartons.query.filter_by(items_item_id = item_id)
 		itemToWithdraw = Items.query.filter_by(item_id = item_id).first()
@@ -319,7 +368,10 @@ def withdraw(item_id):
 		return Response(status=404)
 
 
-@app.route('/api/transactionHistory', methods = ['GET'])
+# Route: /api/transactionHistory, Get all transaction history from database
+# Method: GET
+# Expected Response: HTTP Status 200
+@app.route('/api/admin/transactionHistory', methods = ['GET'])
 def transactionHistory(): 
 	if ("username" in session):
 		current_user = Users.query.filter_by(user_username = session["username"]).first()
@@ -343,12 +395,17 @@ def transactionHistory():
 					"users_user_id" : transaction.users_user_id,
 					})
 
-			return transactionHistory, 200 #Return array with all prior transactions in it
+			return {
+				"transactionHistory" : transactionHistory
+				}, 200 #Return array with all prior transactions in it
 
 	else:
 		return Response(status=404)
 
 
+# Route: /api/transactionHistoryDates, Get all transaction history from database
+# Method: GET
+# Expected Response: HTTP Status 200
 @app.route('/api/admin/transactionHistoryDates', methods = ['GET'])
 def transactionHistoryDates(): 
 	if ("username" in session):
@@ -373,12 +430,23 @@ def transactionHistoryDates():
 					"users_user_id" : transaction.users_user_id,
 					})
 
-			return transactionHistoryByDate, 200 #Return array with all prior transactions in it
+			return {
+				"transactionHistory" : transactionHistoryByDate
+				}, 200 #Return array with all prior transactions in it
 
 	else:
 		return Response(status=404)
 
 
+# Route: /api/admin/editItemInfo, Edit the info for an existing item in the database
+# Method: POST
+# Requested Data:
+#	item_id: Integer
+#	item_name: String
+#	model_number: String
+#	item_price: Integer
+#	quantity: Integer
+# Expected Response: HTTP Status 200
 @app.route('/api/admin/editItemInfo', methods = ['POST'])
 def editItemInfo(): 
 	if ("username" in session):
@@ -404,12 +472,20 @@ def editItemInfo():
 				"quantity" : itemToUpdate.quantity
 				}
 
-			return updatedItemInfo, 200 #Item properly updated!
+			return {
+				"updatedItemInfo" : updatedItemInfo
+				}, 200 #Item properly updated!
 
 	else:
 		return Response(status=404)
 
 
+# Route: /api/admin/editMasterCarton, Edit the info for an existing MC in the database
+# Method: POST
+# Requested Data:
+#	carton_id: Integer
+#	carton_size: Integer
+# Expected Response: HTTP Status 200
 @app.route('/api/admin/editMasterCarton', methods = ['POST'])
 def editMasterCarton(): 
 	if ("username" in session):
@@ -430,6 +506,13 @@ def editMasterCarton():
 		return Response(status=404)
 
 
+# Route: /api/admin/addBin, Add a new bin in the database
+# Method: POST
+# Requested Data:
+#	bin_height: Integer
+#	bin_location: String
+#	rack_info_rack_id: Integer
+# Expected Response: HTTP Status 200
 @app.route('/api/admin/addBin', methods = ['POST'])
 def addBin(): 
 	if ("username" in session):
@@ -452,6 +535,12 @@ def addBin():
 		return Response(status=404)
 
 
+# Route: /api/admin/addRack, Add a new rack in in the database
+# Method: POST
+# Requested Data:
+#	bin_height: Integer
+#	rack_location: String
+# Expected Response: HTTP Status 200
 @app.route('/api/admin/addRack', methods = ['POST'])
 def addRack(): 
 	if ("username" in session):
@@ -476,5 +565,3 @@ def addRack():
 if __name__ == '__main__':
 	app.debug=True
 	app.run()
-
-	

@@ -278,7 +278,7 @@ def findItem(model_num):
 
 
 @app.route('/api/addMasterCarton', methods = ['POST'])
-def addItem():
+def addMasterCarton():
 	if "username" in session is None:
 		return Response(status=404)
 

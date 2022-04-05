@@ -4,9 +4,9 @@ import { Col, Row, Form, Table, Button } from "react-bootstrap";
 
 const Item = (props) => (
   <tr>
-    <td>{props.item.item_name}</td>
-    <td>{props.item.model_number}</td>
-    <td>{props.item.quantity}</td>
+    <td>{props.item["Item Name"]}</td>
+    <td>{props.item["Item Model Num"]}</td>
+    <td>{props.item["Item Quantity"]}</td>
     <td>{props.item.info}</td>
   </tr>
 );
@@ -25,20 +25,20 @@ function InventoryPage() {
     {item_name:"Fine Particle Filter", model_number:"435hhn", quantity:"800", info: ""}]
   });
 
-      //TODO CHANGE TO ACTUAL ENDPOINT
-    // useEffect(() => {
-    //     fetch('http://localhost:5000/api/inventory')
-    //     .then((response) =>{
-    //         setSalesItems({items: response.data});
-    //     }).catch(error => console.log(error));
-    // }, []);
+    useEffect(() => {
+        fetch('http://127.0.0.1:5000/api/allItems')
+        .then((response) =>{
+          console.log(response);
+            setInvItems({items: response.data});
+        }).catch(error => console.log(error));
+    }, []);
 
 // This method will map out the recent sales onto the table
 function itemList(collection) {
   return collection.items.map((currentitem) => {
       return (
       <Item
-      key={currentitem.model_number}
+      key={currentitem["Item Model Num"]}
       item={currentitem}
       />
       );

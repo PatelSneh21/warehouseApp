@@ -18,25 +18,35 @@ function App() {
   const [user, setUser] = useState({name: "", email: ""});
   const [error, setError] = useState("");
 
-  function Authenticate(userInfo) {
-    // fetch("http://localhost:5000/api/login", {
-    //   method:"POST",
-    //   cache: "no-cache",
-    //   headers:{
-    //       "content_type":"application/json",
-    //   },
-    //   body:JSON.stringify(userInfo)
-    // }).then(response => {
-    //   return response.status === 200
-    // })
-    console.log(JSON.stringify(userInfo));
-    return true;
+  async function Authenticate(userInfo) {
+    let sendData =  {
+      "username" : userInfo.email,
+      "password" : userInfo.password,
+      "rememberMe": true
+    }
+
+    const response = await fetch("http://127.0.0.1:5000/api/login", {
+      method:"POST",
+      cache: "no-cache",
+      headers:{
+          "content_type":"application/json",
+      },
+      body: JSON.stringify(sendData)
+    })
+    return response.ok
+
+    
   }
 
 
   //login function
   const Login = details => {
-    console.log(details);
+    let userinfo = {
+      "username" : details.email,
+      "password" : details.password,
+      "rememberMe": true
+    }
+    console.log(userinfo);
     
 
 

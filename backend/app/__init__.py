@@ -22,7 +22,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:@127.0.0.1:3306/mydb"
 app.config['SECRET_KEY'] = os.environ.get('PASSWORD_SALT')
 
 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-salt = o`s.environ.get('PASSWORD_SALT')
+salt = os.environ.get('PASSWORD_SALT')
 
 #Database Setup:
 db = SQLAlchemy(app) # flask-sqlalchemy
@@ -289,7 +289,7 @@ def allItems():
 		return Response(status=404)
 
 
-# Route: /api/findItem/<model_num>, Get a list of locations of items in the system
+# Route: /api/tItem/<model_num>, Get a list of locations of items in the system
 # Method: GET
 # Param: model_num
 # Expected Response: HTTP Status 200

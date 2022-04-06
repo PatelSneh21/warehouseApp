@@ -1,12 +1,13 @@
 import React, {useState, useEffect} from 'react'
+import {useLocation} from "react-router-dom";
 import { Col, Row, Form, Table, Button } from "react-bootstrap";
 
 
 const Item = (props) => (
   <tr>
-    <td>{props.item.item_name}</td>
-    <td>{props.item.model_number}</td>
-    <td>{props.item.quantity}</td>
+    <td>{props.item["Item Name"]}</td>
+    <td>{props.item["Item Model Num"]}</td>
+    <td>{props.item["Item Quantity"]}</td>
     <td>{props.item.info}</td>
   </tr>
 );
@@ -25,20 +26,38 @@ function InventoryPage() {
     {item_name:"Fine Particle Filter", model_number:"435hhn", quantity:"800", info: ""}]
   });
 
-      //TODO CHANGE TO ACTUAL ENDPOINT
-    // useEffect(() => {
-    //     fetch('http://localhost:5000/api/inventory')
-    //     .then((response) =>{
-    //         setSalesItems({items: response.data});
-    //     }).catch(error => console.log(error));
-    // }, []);
+  const {state} = useLocation();
+
+  let userData = {
+    "username" : state.user.email
+  }
+
+
+    useEffect(() => {
+        fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allItems',
+        {
+          method:"POST",
+          mode: 'cors',
+          headers:{
+              "Content-Type":"application/json",
+          },
+          body: JSON.stringify(userData)
+        }).then(response => response.json())  
+        .then(data => {
+          console.log(data);
+          setInvItems({items: data.items});
+        })
+        .catch(error => console.log(error));
+        
+   
+    }, []);
 
 // This method will map out the recent sales onto the table
 function itemList(collection) {
   return collection.items.map((currentitem) => {
       return (
       <Item
-      key={currentitem.model_number}
+      key={currentitem["Item Model Num"]}
       item={currentitem}
       />
       );

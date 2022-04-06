@@ -12,20 +12,37 @@ from flask_sqlalchemy import SQLAlchemy
 from numpy import quantile
 from sqlalchemy.ext.automap import automap_base
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_session import Session, SqlAlchemySessionInterface
 # Import routing, models and Start the App
 from app import views
 
 app = Flask(__name__)
+
+# CHANGE ORIGIN URL HERE
+CORS(app, supports_credentials=True, allow_headers='Content-Type', origin='http://ec2-54-83-68-204.compute-1.amazonaws.com:30003000/')
 app.debug = True
 app.permanent_session_lifetime = timedelta(days = 5) #A user who clicks remember me will be logged in for this long
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:@127.0.0.1:3306/mydb"
-app.config['SECRET_KEY'] = os.environ.get('PASSWORD_SALT')
+
+#UNCOMMENT THIS FOR WINDOWS/MAYBE LINUX
+# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:@127.0.0.1:3306/mydb"
+
+#UNCOMMENT THIS FOR MAC
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:root@127.0.0.1:3306/mydb"
+# app.config['SECRET_KEY'] = os.environ.get('PASSWORD_SALT')
+app.config['SECRET_KEY'] = 'temp'
+
 
 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+<<<<<<< HEAD
 salt = os.environ.get('PASSWORD_SALT')
+=======
+# salt = os.environ.get('PASSWORD_SALT')
+salt = "temp"
+>>>>>>> e2330e278ae06176edb96119ca51ef2d7fe0483f
 
 #Database Setup:
 db = SQLAlchemy(app) # flask-sqlalchemy
+
 Base = automap_base()
 Base.prepare(db.engine, reflect=True)
 
@@ -65,7 +82,7 @@ class Items(db.Model):
 	model_number = db.Column(db.String(120))
 	item_price = db.Column(db.Float)
 	quantity = db.Column(db.Integer)
-	bin_location = db.relationship('Bin', secondary = itemLocations, backref = db.backref(('itemInBin'), lazy = 'dynamic'))
+	# bin_location = db.relationship('Bin', secondary = itemLocations, backref = db.backref(('itemInBin'), lazy = 'dynamic'))
 
 class Customers(db.Model):
 	__tablename__ = 'Customers'
@@ -164,6 +181,13 @@ def signup():
 # Expected Response: User added to session, HTTP Response Code 200
 @app.route('/api/login', methods = ['POST', 'GET'])
 def login():
+	# if request.method == 'OPTIONS':
+	# 	resp = Response()
+	# 	resp.headers['Access-Control-Allow-Origin'] = "http://localhost:3000/"
+	# 	resp.headers['Access-Control-Allow-Credentials'] = 'true'
+	# 	resp.headers['Access-Control-Allow-Headers'] = "Content-Type"
+
+	# 	return resp
 	if "username" in session:
 		return Response(status = 300) #User is already logged in, redirect to dashboard
 
@@ -173,6 +197,7 @@ def login():
 		username = username.lower()
 		password = request.json["password"]
 		sessionPermanance = request.json['rememberMe']
+		# success = 404
 
 		user = Users.query.filter_by(user_username = username).first()
 		if user is None: 
@@ -182,16 +207,53 @@ def login():
 			session.permanent = sessionPermanance			 		
 			session["username"] = user.user_username
 			return Response(status = 200) #Redirect to dashboard
+			
 
 		return Response(status = 404) #Incorrect Password
 
+
+		# res['actionSuccess'] = False
+		# js = json.dumps(res)
+
+		# resp = Response(js, status=success, mimetype='application/json')        
+		# resp.headers['Access-Control-Allow-Origin'] = clientUrl
+		# resp.headers['Access-Control-Allow-Credentials'] = 'true'
+		# resp.headers['Access-Control-Allow-Headers'] = "Content-Type"
+		
+
+		# return resp
 	#Our GET Request so that users can access the login page
 	return Response(status = 200)
 
 
+# @bp.route('/login', methods=('POST','OPTIONS'))
+# def login():
+#     if request.method == 'OPTIONS':
+#         resp = Response()
+#         resp.headers['Access-Control-Allow-Origin'] = clientUrl
+#         resp.headers['Access-Control-Allow-Credentials'] = 'true'
+#         resp.headers['Access-Control-Allow-Headers'] = "Content-Type"
+
+#         return resp
+#     else:
+
+#         '''
+#         use session for something  
+#         '''  
+
+#         res['actionSuccess'] = False
+#         js = json.dumps(res)
+
+#         resp = Response(js, status=200, mimetype='application/json')        
+#         resp.headers['Access-Control-Allow-Origin'] = clientUrl
+#         resp.headers['Access-Control-Allow-Credentials'] = 'true'
+#         resp.headers['Access-Control-Allow-Headers'] = "Content-Type"
+
+#         return resp
+
 # Route: /api/logout
 # Method: GET
-# Expected Response: Remmove a user from the flask-session, HTTP Status 200
+# Expected Response: Remove a user from the flask-session, HTTP Status 200
 @app.route('/api/logout')
 def logout():
 	if "username" in session is None:
@@ -207,6 +269,7 @@ def logout():
 @app.route('/api/isLoggedIn', methods = ['GET'])
 def isLoggedIn():
 	user = {}
+	print(session)
 	if ("username" in session):
 		current_user = Users.query.filter_by(user_username = session["username"]).first()
 		user = {
@@ -238,9 +301,9 @@ def addItem():
 		quantity = request.json["quantity"]
 		newItem = Items(item_name = item_name, model_number = model_number, item_price = item_price, quantity = quantity)
 
-		itemLocation = Bin.query.filter_by(bin_location = request.json["bin_id"]).first()
-		if itemLocation != None: 
-			newItem.bin_location.append(itemLocation)
+		# itemLocation = Bin.query.filter_by(bin_location = request.json["bin_id"]).first()
+		# if itemLocation != None: 
+		# 	newItem.bin_location.append(itemLocation)
 		db.session.add(newItem)
 		db.session.commit()
 		return Response(status=200)
@@ -256,13 +319,10 @@ def allUsers():
 		if (current_user.user_type != "Admin"): #Ensure only admins can see list of all users
 			return Response(status=404)
 		else:	
-			users = []
-			for user in User.query.all():
-				users.append({
-					'Name' : user.user_name,
-					'Username': user.username
-					})
-			return users, 200
+			users = Users.query.all()
+			print(users)
+				
+			return 200
 	else:
 		return Response(status=404)
 
@@ -270,23 +330,42 @@ def allUsers():
 # Route: /api/admin/allItems, Get a list of items in the system
 # Method: GET
 # Expected Response: HTTP Status 200
-@app.route('/api/allItems')
-def allItems(): 
-	if ("username" in session):
-		current_user = Users.query.filter_by(user_username = session["username"]).first()
-		items = []
-		for item in Items.query.all():
-			items.append({
-				'Item Name' : item.item_name,
-				'Item Model Num': item.model_number,
-				'Item Quantity' : item.quantity
-				}) 
-		return {
-			"items" : items
-		}, 200
+# @app.route('/api/allItems')
+# def allItems(): 
+# 	print(session)
+# 	if ("username" in session):
+# 		current_user = Users.query.filter_by(user_username = session["username"]).first()
+# 		items = []
+# 		for item in Items.query.all():
+# 			items.append({
+# 				'Item Name' : item.item_name,
+# 				'Item Model Num': item.model_number,
+# 				'Item Quantity' : item.quantity
+# 				}) 
+# 		return {
+# 			"items" : items
+# 		}, 200
 
-	else:
-		return Response(status=404)
+# 	else:
+# 		return Response(status=404)
+
+@app.route('/api/allItems', methods = ['POST'])
+def allItems(): 
+	username = request.json["username"]
+	username = username.lower()
+	user = Users.query.filter_by(user_username = username).first()
+	if user is None: 
+			return Response(status = 404) #User does not exist
+	items = []
+	for item in Items.query.all():
+		items.append({
+			'Item Name' : item.item_name,
+			'Item Model Num': item.model_number,
+			'Item Quantity' : item.quantity
+			}) 
+	return {
+		"items" : items
+	}, 200
 
 
 # Route: /api/tItem/<model_num>, Get a list of locations of items in the system

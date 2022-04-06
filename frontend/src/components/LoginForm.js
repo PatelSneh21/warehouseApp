@@ -18,7 +18,7 @@ function LoginForm({ Login, error }) {
                 <img src={Logo} />
                 <div className="form-group">
                     <label htmlFor="email">Email:</label>
-                    <input type="email" name="email" id="email" onChange={event => setDetails({...details, email: event.target.value})} value={details.email}/>
+                    <input type="text" name="email" id="email" onChange={event => setDetails({...details, email: event.target.value})} value={details.email}/>
                 </div>
                 <div className="form-group">
                     <label htmlFor="password">Password:</label>

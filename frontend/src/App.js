@@ -10,45 +10,41 @@ import {
 import "./App.css"
 
 function App() {
-  const adminUser = {
-    email: "admin@admin.com",
-    password: "34rferfwvgg"
-  }
 
   const [user, setUser] = useState({name: "", email: ""});
   const [error, setError] = useState("");
 
-  function Authenticate(userInfo) {
-    // fetch("http://localhost:5000/api/login", {
-    //   method:"POST",
-    //   cache: "no-cache",
-    //   headers:{
-    //       "content_type":"application/json",
-    //   },
-    //   body:JSON.stringify(userInfo)
-    // }).then(response => {
-    //   return response.status === 200
-    // })
-    console.log(JSON.stringify(userInfo));
-    return true;
-  }
-
 
   //login function
   const Login = details => {
-    console.log(details);
-    
-
-
-    if (Authenticate(details)){
-      console.log("Logged in");
-      setUser({
-        email: details.email
-      })
-    } else {
-      console.log("Details do not match.");
-      setError("Details do not match");
+    let userinfo = {
+      "username" : details.email,
+      "password" : details.password,
+      "rememberMe": true
     }
+    console.log(userinfo);
+    
+    fetch("http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/login", {
+      method:"POST",
+      mode: 'cors',
+      headers:{
+          "Content-Type":"application/json",
+      },
+      body: JSON.stringify(userinfo)
+    }).then(response => {
+      if ( response.ok ){
+        console.log(user)
+        //console.log("Logged in");
+        setUser({
+          email: details.email
+        })
+        console.log(user)
+      } else {
+        console.log("Details do not match.");
+        setError("Details do not match");
+      }
+    });
+
   }
 
   const Logout = () => {

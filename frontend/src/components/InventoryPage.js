@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react'
+import {useLocation} from "react-router-dom";
 import { Col, Row, Form, Table, Button } from "react-bootstrap";
 
 
@@ -25,13 +26,30 @@ function InventoryPage() {
     {item_name:"Fine Particle Filter", model_number:"435hhn", quantity:"800", info: ""}]
   });
 
+  const {state} = useLocation();
+
+  let userData = {
+    "username" : state.user.email
+  }
+
+
     useEffect(() => {
         fetch('http://127.0.0.1:5000/api/allItems',
-        )
-        .then((response) =>{
-          console.log(response.data);
-            setInvItems({items: response.data});
-        }).catch(error => console.log(error));
+        {
+          method:"POST",
+          mode: 'cors',
+          headers:{
+              "Content-Type":"application/json",
+          },
+          body: JSON.stringify(userData)
+        }).then(response => response.json())  
+        .then(data => {
+          console.log(data);
+          setInvItems({items: data.items});
+        })
+        .catch(error => console.log(error));
+        
+   
     }, []);
 
 // This method will map out the recent sales onto the table

@@ -18,27 +18,6 @@ function App() {
   const [user, setUser] = useState({name: "", email: ""});
   const [error, setError] = useState("");
 
-  async function Authenticate(userInfo) {
-    let sendData =  {
-      "username" : userInfo.email,
-      "password" : userInfo.password,
-      "rememberMe": true
-    }
-
-    const response = await fetch("http://127.0.0.1:5000/api/login", {
-      method:"POST",
-      cache: "no-cache",
-      headers:{
-          "content_type":"application/json",
-      },
-      body: JSON.stringify(sendData)
-    })
-    //console.log(response.status);
-    return response.status === 200
-
-    
-  }
-
 
   //login function
   const Login = details => {
@@ -49,8 +28,16 @@ function App() {
     }
     //console.log(userinfo);
     
-    Authenticate(details).then(function(results) {
-      if (results){
+    fetch("http://127.0.0.1:5000/api/login", {
+      method:"POST",
+      mode: 'cors',
+      headers:{
+          "Content-Type":"application/json",
+      },
+      body: JSON.stringify(userinfo)
+    }).then(response => {
+      if ( response.ok ){
+        console.log(response)
         //console.log("Logged in");
         setUser({
           email: details.email

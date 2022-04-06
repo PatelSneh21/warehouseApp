@@ -13,6 +13,7 @@ import Home from './components/Home';
 import HomeContent from './components/HomeContent';
 import HistoryPage from './components/HistoryPage';
 import InventoryPage from './components/InventoryPage';
+import AddItem from './components/AddItem';
 import 'bootstrap';
 import 'bootstrap/dist/js/bootstrap.js';
 import $ from 'jquery';
@@ -28,6 +29,7 @@ ReactDOM.render(
         <Route index element={<HomeContent />} />
         <Route path="history" element={<HistoryPage />} />
         <Route path="inventory" element={<InventoryPage />} />
+        <Route path="addItem" element={<AddItem />} />
       </Route>
 
       {/* <Route path="home" element={<Home />} />

@@ -1,7 +1,7 @@
 import React from 'react'
 // We import NavLink to utilize the react router.
 import { NavLink, useLocation } from 'react-router-dom'
-import { FaHome, FaClipboardList, FaHistory} from 'react-icons/fa';
+import { FaHome, FaClipboardList, FaHistory, FaPlus} from 'react-icons/fa';
 
 
 function LeftNav(props) {
@@ -25,6 +25,8 @@ function LeftNav(props) {
                         </NavLink> 
                         <NavLink className={(navData) => (navData.isActive ? "navItem-active" : 'navItem')} end to="/home/history" state={{user:state.user}}>
                             <FaHistory className='icon'/> History</NavLink>
+                        <NavLink className={(navData) => (navData.isActive ? "navItem-active" : 'navItem')} end to="/home/addItem" state={{user:state.user}}>
+                            <FaPlus className='icon'/> Add Item</NavLink>
                     </nav>
                         
                       

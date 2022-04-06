@@ -10,12 +10,10 @@ import DropdownButton from 'react-bootstrap/DropdownButton'
 function TopBar() {
     const {state} = useLocation();
 
-    //let navigate = useNavigate();
     function logout(e) {
       e.preventDefault();
       localStorage.clear();
       window.location.href = '/';
-      //navigate("/", {state: {user: {name: "", email: ""}}})
     }
 
 

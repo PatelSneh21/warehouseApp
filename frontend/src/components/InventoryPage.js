@@ -34,7 +34,7 @@ function InventoryPage() {
 
 
     useEffect(() => {
-        fetch('http://127.0.0.1:5000/api/allItems',
+        fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allItems',
         {
           method:"POST",
           mode: 'cors',

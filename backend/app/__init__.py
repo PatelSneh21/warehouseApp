@@ -19,7 +19,7 @@ from app import views
 app = Flask(__name__)
 
 # CHANGE ORIGIN URL HERE
-CORS(app, supports_credentials=True, allow_headers='Content-Type', origin='http://localhost:3000/')
+CORS(app, supports_credentials=True, allow_headers='Content-Type', origin='http://ec2-54-83-68-204.compute-1.amazonaws.com:30003000/')
 app.debug = True
 app.permanent_session_lifetime = timedelta(days = 5) #A user who clicks remember me will be logged in for this long
 

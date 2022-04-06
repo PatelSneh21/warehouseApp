@@ -345,7 +345,7 @@
   grid-area: top-user;
   font-size: 18px;
   padding-right: 15px;
-  overflow: hidden;
+  /* overflow: hidden; */
   text-align: right;
 }
 
@@ -354,6 +354,7 @@
     right: 2px;
     font-size: 50px;
     padding: 0 10px;
+    
 }
 
  /* End top bar styling */

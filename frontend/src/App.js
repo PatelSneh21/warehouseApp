@@ -10,10 +10,6 @@ import {
 import "./App.css"
 
 function App() {
-  const adminUser = {
-    email: "admin@admin.com",
-    password: "34rferfwvgg"
-  }
 
   const [user, setUser] = useState({name: "", email: ""});
   const [error, setError] = useState("");
@@ -26,9 +22,9 @@ function App() {
       "password" : details.password,
       "rememberMe": true
     }
-    //console.log(userinfo);
+    console.log(userinfo);
     
-    fetch("http://127.0.0.1:5000/api/login", {
+    fetch("http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/login", {
       method:"POST",
       mode: 'cors',
       headers:{
@@ -37,11 +33,12 @@ function App() {
       body: JSON.stringify(userinfo)
     }).then(response => {
       if ( response.ok ){
-        console.log(response)
+        console.log(user)
         //console.log("Logged in");
         setUser({
           email: details.email
         })
+        console.log(user)
       } else {
         console.log("Details do not match.");
         setError("Details do not match");

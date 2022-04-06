@@ -26,9 +26,10 @@ function InventoryPage() {
   });
 
     useEffect(() => {
-        fetch('http://127.0.0.1:5000/api/allItems')
+        fetch('http://127.0.0.1:5000/api/allItems',
+        )
         .then((response) =>{
-          console.log(response);
+          console.log(response.data);
             setInvItems({items: response.data});
         }).catch(error => console.log(error));
     }, []);

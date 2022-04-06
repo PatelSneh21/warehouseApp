@@ -33,7 +33,8 @@ function App() {
       },
       body: JSON.stringify(sendData)
     })
-    return response.ok
+    //console.log(response.status);
+    return response.status === 200
 
     
   }
@@ -46,19 +47,20 @@ function App() {
       "password" : details.password,
       "rememberMe": true
     }
-    console.log(userinfo);
+    //console.log(userinfo);
     
+    Authenticate(details).then(function(results) {
+      if (results){
+        //console.log("Logged in");
+        setUser({
+          email: details.email
+        })
+      } else {
+        console.log("Details do not match.");
+        setError("Details do not match");
+      }
+    });
 
-
-    if (Authenticate(details)){
-      console.log("Logged in");
-      setUser({
-        email: details.email
-      })
-    } else {
-      console.log("Details do not match.");
-      setError("Details do not match");
-    }
   }
 
   const Logout = () => {

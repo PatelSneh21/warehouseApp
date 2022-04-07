@@ -81,7 +81,7 @@ function AddItem() {
 
     return (
         <div className="create-content">
-          <div className="create-card">
+          <div className="result-card">
           <h3>Create New Item</h3>
           <form onSubmit={onSubmit}>
             <div className="form-group">

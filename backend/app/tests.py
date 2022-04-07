@@ -1,86 +1,62 @@
-import unittest
+try: 
+  from app import app
+  import unittest
+except Exception as e:
+  print("Error importing App")
 
 
-########################
-#### helper methods ####
-########################
 
-def getStatus(self):
-  return self.app.get(
-  '/status',
-  follow_redirects=True
-  )
+class FlaskTest(unittest.TestCase):
 
-def register(self, username, name, userType, password):
-  return self.app.post(
-  '/api/signup',
-  data=dict(username=username, name=name, userType=usertype, password=password),
-  follow_redirects=True
-  )
- 
-def login(self, username, password):
-  return self.app.post(
-  '/api/login',
-  data=dict(username=username, password=password),
-  follow_redirects=True
-  )
-
-def isLoggedIn(self):
-  return self.app.get(
-  '/api/isLoggedIn',
-  follow_redirects=True
-  )
- 
-def logout(self):
-  return self.app.get(
-  '/api/logout',
-  follow_redirects=True
-  )
+  #Check for for server running. This should always be passed
+  def test_status(self): 
+    tester = app.test_client(self)
+    response = tester.get("/status")
+    status = response.status_code
+    self.assertEqual(status, 200)
 
 
-########################
-#### test methods ####
-########################
+  #USER MODULE TESTS:
+  #Check that user can sign up
+  #MAKE SURE YOU CHANGE USERNAME PRIOR TO RUNNING TEST
+  def test_signup(self):
+    tester = app.test_client(self)
+    testData = {
+      "username" : "TestingUser1",
+      "name" : "Sneh Patel",
+      "userType" : "Employee",
+      "password" : "password"
+    }
+    response = tester.post('/api/signup', json=testData)
+    status = response.status_code
+    self.assertEqual(status, 202)
 
-def test_connection(self):
-  response = self.getStatus()
-  self.assertEqual(response.status_code, 200)
+  #Check user can logout
+  def test_logout(self):
+    tester = app.test_client(self)
+    response = tester.get("/api/logout")
+    status = response.status_code
+    self.assertEqual(status, 200)
 
-def test_valid_user_registration(self):
-  response = self.register('Spatel22', 'Sneh Patel', 'Employee', 'password')
-  self.assertEqual(response.status_code, 202)
-  
-def test_invalid_user_registration(self):
-  response = self.register('', '', '', '')
-  self.assertEqual(response.status_code, 404)
-  
-def test_logout_notloggedin(self):
-  response = self.logout()
-  self.assertEqual(response.status_code, 300)
-  
-def test_isLoggedIn(self):
-  response = self.isLoggedIn()
-  self.assertEqual(response.status_code, 404)
- 
-def test_invalid_login(self):
-  response = self.login('invalid', 'invalid')
-  self.assertEqual(response.status_code, 404)
-  
-def test_valid_login(self):
-  response = self.login('Spatel22', 'password')
-  self.assertEqual(response.status_code, 200)
-  
-def test_isLoggedIn(self):
-  response = self.isLoggedIn()
-  user = {
-			"username": Spatel22,
-			"userType": Employee
-		}
-  self.assertEqual(response.status_code, 200)
-  self.assertEqual(response.user, user)
+  #Test isLoggedIn
+  def test_isLoggedIn(self): 
+    tester = app.test_client(self)
+    response = tester.get("/api/isLoggedIn")
+    status = response.status_code
+    self.assertEqual(status, 404)
 
-def test_logout_whenloggedin(self):
-  response = self.logout()
-  self.assertEqual(response.status_code, 200)
-  
-  
+   #Test user login method
+  def test_login(self): 
+    tester = app.test_client(self)
+    testData = {
+      "username" : "TestingUser",
+      "password" : "password",
+      "rememberMe" : True
+
+    }
+    response = tester.post('/api/login', json=testData)
+    status = response.status_code
+    self.assertEqual(status, 200)
+
+if __name__ == "__main__":
+  unittest.main()

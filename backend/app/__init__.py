@@ -27,18 +27,16 @@ app.permanent_session_lifetime = timedelta(days = 5) #A user who clicks remember
 # app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:@127.0.0.1:3306/mydb"
 
 #UNCOMMENT THIS FOR MAC
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:root@127.0.0.1:3306/mydb"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:@127.0.0.1:3306/mydb"
 # app.config['SECRET_KEY'] = os.environ.get('PASSWORD_SALT')
 app.config['SECRET_KEY'] = 'temp'
 
-
 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-<<<<<<< HEAD
+#<<<<<<< HEAD
 salt = os.environ.get('PASSWORD_SALT')
-=======
 # salt = os.environ.get('PASSWORD_SALT')
 salt = "temp"
->>>>>>> e2330e278ae06176edb96119ca51ef2d7fe0483f
+#>>>>>>> e2330e278ae06176edb96119ca51ef2d7fe0483f
 
 #Database Setup:
 db = SQLAlchemy(app) # flask-sqlalchemy

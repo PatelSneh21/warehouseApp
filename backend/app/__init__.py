@@ -260,6 +260,16 @@ def logout():
 		session.pop("username", None)
 		return Response(status = 200) 
 
+# Route: /api/deleteUser
+# Method: POST
+# Expected Response: Remove a user from the database, HTTP Status 200
+@app.route('/api/deleteUser', methods = ['DELETE'])
+def deleteUser():
+	toDelete = Users.query.filter_by(user_username="UserTest").first()
+	db.session.delete(toDelete)
+	db.session.flush()
+	db.session.commit()
+	return Response(status=200)
 
 # Route: /api/isLoggedIn, Return user data if a user is logged in from a session
 # Method: GET

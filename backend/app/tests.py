@@ -5,7 +5,9 @@ except Exception as e:
   print("Error importing App")
 
 
-
+#To run:
+#Make sure you are in the app folder, not the same folder as init.
+# Run the command python -m unittest
 class FlaskTest(unittest.TestCase):
 
   #Check for for server running. This should always be passed
@@ -22,7 +24,7 @@ class FlaskTest(unittest.TestCase):
   def test_signup(self):
     tester = app.test_client(self)
     testData = {
-      "username" : "TestingUser1",
+      "username" : "UserTest",
       "name" : "Sneh Patel",
       "userType" : "Employee",
       "password" : "password"
@@ -55,6 +57,13 @@ class FlaskTest(unittest.TestCase):
 
     }
     response = tester.post('/api/login', json=testData)
+    status = response.status_code
+    self.assertEqual(status, 200)
+
+  #Delete our test user so it doesn't interfere with the database
+  def test_delete(self): 
+    tester = app.test_client(self)
+    response = tester.delete('/api/deleteUser')
     status = response.status_code
     self.assertEqual(status, 200)
 

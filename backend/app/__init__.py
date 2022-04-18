@@ -19,7 +19,7 @@ from app import views
 app = Flask(__name__)
 
 # CHANGE ORIGIN URL HERE
-CORS(app, supports_credentials=True, allow_headers='Content-Type', origin='http://ec2-54-83-68-204.compute-1.amazonaws.com:30003000/')
+CORS(app, supports_credentials=True, allow_headers='Content-Type', origin='http://localhost:3000/')
 app.debug = True
 app.permanent_session_lifetime = timedelta(days = 5) #A user who clicks remember me will be logged in for this long
 
@@ -27,16 +27,14 @@ app.permanent_session_lifetime = timedelta(days = 5) #A user who clicks remember
 # app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:@127.0.0.1:3306/mydb"
 
 #UNCOMMENT THIS FOR MAC
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:@127.0.0.1:3306/mydb"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:root@127.0.0.1:3306/mydb"
 # app.config['SECRET_KEY'] = os.environ.get('PASSWORD_SALT')
 app.config['SECRET_KEY'] = 'temp'
 
+
 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-#<<<<<<< HEAD
-salt = os.environ.get('PASSWORD_SALT')
 # salt = os.environ.get('PASSWORD_SALT')
 salt = "temp"
-#>>>>>>> e2330e278ae06176edb96119ca51ef2d7fe0483f
 
 #Database Setup:
 db = SQLAlchemy(app) # flask-sqlalchemy
@@ -363,7 +361,7 @@ def allItems():
 	username = username.lower()
 	user = Users.query.filter_by(user_username = username).first()
 	if user is None: 
-			return Response(status = 404) #User does not exist
+		return Response(status = 404) #User does not exist
 	items = []
 	for item in Items.query.all():
 		items.append({
@@ -376,7 +374,25 @@ def allItems():
 	}, 200
 
 
-# Route: /api/tItem/<model_num>, Get a list of locations of items in the system
+# Route: /api/searchItem/<query>, Returns all items that match the model_number or item_name
+# Method: GET
+# Param: query
+# Expected Response: HTTP Status 200
+@app.route('/api/searchItemModel/<query>')
+def searchItem(query):
+	items = []
+	for item in Items.query.all():
+		if (str(item.model_number) == query) or (str(item.item_name) == query):
+			items.append({
+                'Item Name' : item.item_name,
+                'Item Model Num': item.model_number,
+                'Item Quantity' : item.quantity
+                })
+	return {
+        "items" : items
+    }, 200
+
+# Route: /api/findItem/<model_num>, Get a list of locations of items in the system
 # Method: GET
 # Param: model_num
 # Expected Response: HTTP Status 200

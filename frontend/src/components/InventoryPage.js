@@ -32,37 +32,54 @@ function InventoryPage() {
     "username" : state.user.email
   }
 
+  /*
+    search functionality
+  */
+  const [searchTerm, setSearchTerm] = useState("");
 
-    useEffect(() => {
-        fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allItems',
-        {
-          method:"POST",
-          mode: 'cors',
-          headers:{
-              "Content-Type":"application/json",
-          },
-          body: JSON.stringify(userData)
-        }).then(response => response.json())  
-        .then(data => {
-          console.log(data);
-          setInvItems({items: data.items});
-        })
-        .catch(error => console.log(error));
-        
-   
-    }, []);
+  //when the search term changes, call api to get the search results
+  useEffect(() => {
+    if (searchTerm !== "") {
+      //'http://127.0.0.1:5000/api/searchItemModel/' + searchTerm
+      //'http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/searchItemModel/' + searchTerm
+      fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/searchItemModel/' + searchTerm)
+      .then(response => response.json())
+      .then(data => setInvItems({items: data.items}))
+      .catch(error => console.log(error));
+    }
+  }, [searchTerm]);
 
-// This method will map out the recent sales onto the table
-function itemList(collection) {
-  return collection.items.map((currentitem) => {
-      return (
-      <Item
-      key={currentitem["Item Model Num"]}
-      item={currentitem}
-      />
-      );
-  });
-}
+
+  useEffect(() => {
+      fetch('http://127.0.0.1:5000/api/allItems',
+      {
+        method:"POST",
+        mode: 'cors',
+        headers:{
+            "Content-Type":"application/json",
+        },
+        body: JSON.stringify(userData)
+      }).then(response => response.json())  
+      .then(data => {
+        console.log(data);
+        setInvItems({items: data.items});
+      })
+      .catch(error => console.log(error));
+      
+  
+  }, []);
+
+  // This method will map out the recent sales onto the table
+  function itemList(collection) {
+    return collection.items.map((currentitem) => {
+        return (
+        <Item
+        key={currentitem["Item Model Num"]}
+        item={currentitem}
+        />
+        );
+    });
+  }
 
 
   return (
@@ -70,19 +87,8 @@ function itemList(collection) {
         <h2>Inventory</h2>
         <div className='search-card'>
           <h5>What are you looking for?</h5>
-          <Form>
-            <Row>
-              <Col xs={10}>
-                <Form.Control placeholder="Search for an item, model num, etc" />
-              </Col>
-              <Col>
-                
-              </Col>
-              <Col>
-              <Button type="Submit">Submit</Button>
-              </Col>
-            </Row>
-          </Form>
+          <input className='search-bar' type="text" placeholder="Search for an item, model num, etc" 
+          onChange={event => setSearchTerm(event.target.value)} value={searchTerm}/>
         </div>
 
         <div className="result-card">

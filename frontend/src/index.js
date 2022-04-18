@@ -16,8 +16,6 @@ import InventoryPage from './components/InventoryPage';
 import AddItem from './components/AddItem';
 import 'bootstrap';
 import 'bootstrap/dist/js/bootstrap.js';
-import $ from 'jquery';
-import Popper from 'popper.js';
 
 ReactDOM.render(
   <BrowserRouter>

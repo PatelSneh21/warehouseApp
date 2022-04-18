@@ -19,12 +19,13 @@ from app import views
 app = Flask(__name__)
 
 # CHANGE ORIGIN URL HERE
-CORS(app, supports_credentials=True, allow_headers='Content-Type', origin='http://ec2-54-83-68-204.compute-1.amazonaws.com:3000/')
+CORS(app)
+#CORS(app, supports_credentials=True, allow_headers='Content-Type', origin='http://ec2-54-83-68-204.compute-1.amazonaws.com:3000/')
 app.debug = True
 app.permanent_session_lifetime = timedelta(days = 5) #A user who clicks remember me will be logged in for this long
 
 #UNCOMMENT THIS FOR WINDOWS/MAYBE LINUX
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:@127.0.0.1:3306/mydb"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:root@0.0.0.0:3306/mydb"
 
 #UNCOMMENT THIS FOR MAC
 # app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:root@127.0.0.1:3306/mydb"

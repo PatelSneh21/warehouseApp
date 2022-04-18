@@ -24,7 +24,7 @@ function App() {
     }
     console.log(userinfo);
     
-    fetch("http://ec2-54-83-68-204.compute-1.amazonaws.com/api/login", {
+    fetch("http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/login", {
       method:"POST",
       mode: 'cors',
       headers:{

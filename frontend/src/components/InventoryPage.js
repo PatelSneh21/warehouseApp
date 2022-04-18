@@ -46,6 +46,21 @@ function InventoryPage() {
       .then(response => response.json())
       .then(data => setInvItems({items: data.items}))
       .catch(error => console.log(error));
+    } else {
+      fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allItems',
+      {
+        method:"POST",
+        mode: 'cors',
+        headers:{
+            "Content-Type":"application/json",
+        },
+        body: JSON.stringify(userData)
+      }).then(response => response.json())  
+      .then(data => {
+        console.log(data);
+        setInvItems({items: data.items});
+      })
+      .catch(error => console.log(error));
     }
   }, [searchTerm]);
 

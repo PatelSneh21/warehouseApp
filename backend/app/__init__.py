@@ -19,28 +19,31 @@ from app import views
 app = Flask(__name__)
 
 # CHANGE ORIGIN URL HERE
-CORS(app, supports_credentials=True, allow_headers='Content-Type', origin='http://localhost:3000/')
+CORS(app, supports_credentials=True, allow_headers='Content-Type', origin='http://ec2-54-83-68-204.compute-1.amazonaws.com:3000/')
 app.debug = True
 app.permanent_session_lifetime = timedelta(days = 5) #A user who clicks remember me will be logged in for this long
 
 #UNCOMMENT THIS FOR WINDOWS/MAYBE LINUX
-# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:@127.0.0.1:3306/mydb"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:@127.0.0.1:3306/mydb"
 
 #UNCOMMENT THIS FOR MAC
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:root@127.0.0.1:3306/mydb"
+# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:root@127.0.0.1:3306/mydb"
 # app.config['SECRET_KEY'] = os.environ.get('PASSWORD_SALT')
 app.config['SECRET_KEY'] = 'temp'
 
 
-regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-# salt = os.environ.get('PASSWORD_SALT')
-salt = "temp"
+regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'	
+#<<<<<<< HEAD	
+salt = os.environ.get('PASSWORD_SALT')	
+# salt = os.environ.get('PASSWORD_SALT')	
+salt = "temp"	
+#>>>>>>> e2330e278ae06176edb96119ca51ef2d7fe0483f
 
 #Database Setup:
 db = SQLAlchemy(app) # flask-sqlalchemy
 
-Base = automap_base()
-Base.prepare(db.engine, reflect=True)
+# Base = automap_base()
+# Base.prepare(db.engine, reflect=True)
 
 #Database Setup:
 #Defines all the tables in the db, used in running SQLAlchemy Queries

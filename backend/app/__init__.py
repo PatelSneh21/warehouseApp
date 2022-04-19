@@ -384,15 +384,16 @@ def allItems():
 # Expected Response: HTTP Status 200
 @app.route('/api/searchItemModel/<query>')
 def searchItem(query):
-	items = []
-	for item in Items.query.all():
-		if (str(item.model_number) == query) or (str(item.item_name) == query):
-			items.append({
+    query = query.lower()
+    items = []
+    for item in Items.query.all():
+        if (query in str(item.model_number).lower()) or (query in str(item.item_name).lower()):
+            items.append({
                 'Item Name' : item.item_name,
                 'Item Model Num': item.model_number,
                 'Item Quantity' : item.quantity
                 })
-	return {
+    return {
         "items" : items
     }, 200
 

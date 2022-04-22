@@ -3,15 +3,35 @@ import {useLocation} from "react-router-dom";
 import { Col, Row, Form, Table, Button } from "react-bootstrap";
 
 
+// function handleDelete(props) {
+//   console.log("delete clicked" + props.item["Item ID"]);
+// }
+
+// TODO CONVERT NUM-CARTONS QUANTITY TO ITEM QUANTITY
+// RIGHT NOW DATABASE ONLY STORES NUM QUANTITY
+
+function handleEdit(props) {
+  console.log("delete clicked" + props.item["Item ID"]);
+}
+
 const Item = (props) => (
   <tr>
     <td>{props.item["Item Name"]}</td>
     <td>{props.item["Item Model Num"]}</td>
+    <td>{props.item["Item Price"]}</td>
     <td>{props.item["Item Quantity"]}</td>
-    <td>{props.item.info}</td>
+    {/* <td>{props.item.info}</td> */}
+    <td>
+      <Button variant="primary"
+      onClick={() => handleEdit(props)}
+      >edit</Button>
+    </td>
+    {/* <td>
+      <Button variant="primary"
+      onClick={() => handleDelete(props)}>delete</Button>
+    </td> */}
   </tr>
 );
-
 
 function InventoryPage() {
   const [invItems, setInvItems] = useState({
@@ -37,7 +57,6 @@ function InventoryPage() {
   */
   const [searchTerm, setSearchTerm] = useState("");
 
-  //when the search term changes, call api to get the search results
   useEffect(() => {
     if (searchTerm !== "") {
       //'http://127.0.0.1:5000/api/searchItemModel/' + searchTerm
@@ -48,41 +67,39 @@ function InventoryPage() {
       .catch(error => console.log(error));
     } else {
       fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allItems',
-      {
-        method:"POST",
-        mode: 'cors',
-        headers:{
-            "Content-Type":"application/json",
-        },
-        body: JSON.stringify(userData)
-      }).then(response => response.json())  
-      .then(data => {
-        console.log(data);
-        setInvItems({items: data.items});
-      })
-      .catch(error => console.log(error));
+        {
+          method:"POST",
+          mode: 'cors',
+          headers:{
+              "Content-Type":"application/json",
+          },
+          body: JSON.stringify(userData)
+        }).then(response => response.json())  
+        .then(data => {
+          setInvItems({items: data.items});
+        })
+        .catch(error => console.log(error));
     }
   }, [searchTerm]);
 
 
-  useEffect(() => {
-      fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allItems',
-      {
-        method:"POST",
-        mode: 'cors',
-        headers:{
-            "Content-Type":"application/json",
-        },
-        body: JSON.stringify(userData)
-      }).then(response => response.json())  
-      .then(data => {
-        console.log(data);
-        setInvItems({items: data.items});
-      })
-      .catch(error => console.log(error));
-      
-  
-  }, []);
+    useEffect(() => {
+        fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allItems',
+        {
+          method:"POST",
+          mode: 'cors',
+          headers:{
+              "Content-Type":"application/json",
+          },
+          body: JSON.stringify(userData)
+        }).then(response => response.json())  
+        .then(data => {
+          setInvItems({items: data.items});
+        })
+        .catch(error => console.log(error));
+        
+   
+    }, []);
 
   // This method will map out the recent sales onto the table
   function itemList(collection) {
@@ -113,8 +130,10 @@ function InventoryPage() {
                 <tr>
                   <th className="invtable-item">Item</th>
                   <th className="invtable-model">Model Number</th>
-                  <th className="invtable-quantity">Quantity</th>
-                  <th className="invtable-info">Additional Information</th>
+                  <th className="invtable-model">Price (per item)</th>
+                  <th className="invtable-quantity">Quantity (items)</th>
+                  {/* <th className="invtable-info">Additional Information</th> */}
+                  <th className="invtable-info">Actions</th>
                 </tr>
             </thead>
             <tbody>{itemList(invItems)}</tbody>

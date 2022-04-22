@@ -378,3 +378,12 @@ html {
 }
 
 /* End search/filter area styling */
+
+
+.radio-inline {
+  margin-right: 20px;
+}
+
+.form-group {
+  margin-bottom: 10px;
+}

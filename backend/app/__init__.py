@@ -20,11 +20,14 @@ app = Flask(__name__)
 
 # CHANGE ORIGIN URL HERE
 CORS(app)
-#CORS(app, supports_credentials=True, allow_headers='Content-Type', origin='http://ec2-54-83-68-204.compute-1.amazonaws.com:3000/')
+# CORS(app, supports_credentials=True, allow_headers='Content-Type', origin='http://localhost:3000/')
 app.debug = True
 app.permanent_session_lifetime = timedelta(days = 5) #A user who clicks remember me will be logged in for this long
 
 #UNCOMMENT THIS FOR WINDOWS/MAYBE LINUX
+# app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:@127.0.0.1:3306/mydb"
+
+# VERSION FOR AWS DEPLOYMENT
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:root@0.0.0.0:3306/mydb"
 
 #UNCOMMENT THIS FOR MAC
@@ -33,18 +36,15 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:root@0.0.0.0:3306/
 app.config['SECRET_KEY'] = 'temp'
 
 
-regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'	
-#<<<<<<< HEAD	
-salt = os.environ.get('PASSWORD_SALT')	
-# salt = os.environ.get('PASSWORD_SALT')	
-salt = "temp"	
-#>>>>>>> e2330e278ae06176edb96119ca51ef2d7fe0483f
+regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+# salt = os.environ.get('PASSWORD_SALT')
+salt = "temp"
 
 #Database Setup:
 db = SQLAlchemy(app) # flask-sqlalchemy
 
-# Base = automap_base()
-# Base.prepare(db.engine, reflect=True)
+Base = automap_base()
+Base.prepare(db.engine, reflect=True)
 
 #Database Setup:
 #Defines all the tables in the db, used in running SQLAlchemy Queries
@@ -262,16 +262,6 @@ def logout():
 		session.pop("username", None)
 		return Response(status = 200) 
 
-# Route: /api/deleteUser
-# Method: POST
-# Expected Response: Remove a user from the database, HTTP Status 200
-@app.route('/api/deleteUser', methods = ['DELETE'])
-def deleteUser():
-	toDelete = Users.query.filter_by(user_username="UserTest").first()
-	db.session.delete(toDelete)
-	db.session.flush()
-	db.session.commit()
-	return Response(status=200)
 
 # Route: /api/isLoggedIn, Return user data if a user is logged in from a session
 # Method: GET
@@ -338,26 +328,8 @@ def allUsers():
 
 
 # Route: /api/admin/allItems, Get a list of items in the system
-# Method: GET
+# Method: POST
 # Expected Response: HTTP Status 200
-# @app.route('/api/allItems')
-# def allItems(): 
-# 	print(session)
-# 	if ("username" in session):
-# 		current_user = Users.query.filter_by(user_username = session["username"]).first()
-# 		items = []
-# 		for item in Items.query.all():
-# 			items.append({
-# 				'Item Name' : item.item_name,
-# 				'Item Model Num': item.model_number,
-# 				'Item Quantity' : item.quantity
-# 				}) 
-# 		return {
-# 			"items" : items
-# 		}, 200
-
-# 	else:
-# 		return Response(status=404)
 
 @app.route('/api/allItems', methods = ['POST'])
 def allItems(): 
@@ -369,8 +341,10 @@ def allItems():
 	items = []
 	for item in Items.query.all():
 		items.append({
+			'Item ID': item.item_id,
 			'Item Name' : item.item_name,
 			'Item Model Num': item.model_number,
+			'Item Price': item.item_price,
 			'Item Quantity' : item.quantity
 			}) 
 	return {
@@ -378,22 +352,181 @@ def allItems():
 	}, 200
 
 
+# Route: /api/checkPrivilages, check if the user is an administrator
+# Method: POST
+# Expected Response: HTTP Status 200
+@app.route('/api/checkPrivilages', methods = ['POST'])
+def checkPrivilages(): 
+    user = request.json["username"]
+
+    current_user = Users.query.filter_by(user_username = user).first()
+
+    if (current_user.user_type != "Admin"):
+        return {"isAdmin" : False}
+    else: 
+        return {"isAdmin" : True}
+
+
+# Route: /api/admin/allDeposits, Get a list of all deposits
+# Method: POST (needed to verify user)
+# Expected Response: HTTP Status 200
+
+@app.route('/api/allDeposits', methods = ['POST'])
+def allDeposits(): 
+	username = request.json["username"]
+	username = username.lower()
+	user = Users.query.filter_by(user_username = username).first()
+	if user is None: 
+		return Response(status = 404) #User does not exist
+	items = []
+	for item in db.session.query(Deposits, Items, Bin, Rack).join(Items, Deposits.item_id == Items.item_id).join(Bin, Deposits.bin_info_bin_id == Bin.bin_id).join(Rack, Deposits.rack_info_rack_id == Rack.rack_id):
+		items.append({
+			'deposit_id': item[0].deposit_id,
+			'deposit_date' : item[0].deposit_date,
+			'num_cartons': item[0].num_cartons,
+			'item_name' : item[1].item_name,
+			'model_number' : item[1].model_number,
+			'bin_location' : item[2].bin_location,
+			'rack_location' : item[3].rack_location,
+			}) 
+	return {
+		"items" : items
+	}, 200
+
+
+# Route: /api/admin/allSamples, Get a list of all samples taken out
+# Method: POST (needed to verify user)
+# Expected Response: HTTP Status 200
+
+@app.route('/api/allSamples', methods = ['POST'])
+def allSamples(): 
+	username = request.json["username"]
+	username = username.lower()
+	user = Users.query.filter_by(user_username = username).first()
+	if user is None: 
+		return Response(status = 404) #User does not exist
+	items = []
+	for item in db.session.query(Samples, Items, Bin, Rack, Users).join(Items, Samples.items_item_id == Items.item_id).join(Bin, Samples.bin_info_bin_id == Bin.bin_id).join(Rack, Samples.rack_info_rack_id == Rack.rack_id).join(Users, Samples.users_user_id == Users.user_id):
+		items.append({
+			'sample_id': item[0].sample_id,
+			'withdraw_date' : item[0].withdraw_date,
+			'num_cartons': item[0].item_amount,
+			'item_name' : item[1].item_name,
+			'model_number' : item[1].model_number,
+			'bin_location' : item[2].bin_location,
+			'rack_location' : item[3].rack_location,
+			'user': item[4].user_username
+			}) 
+	return {
+		"items" : items
+	}, 200
+
+
+# Route: /api/admin/allSales, Get a list of all samples taken out
+# Method: POST (needed to verify user)
+# Expected Response: HTTP Status 200
+
+@app.route('/api/allSales', methods = ['POST'])
+def allSales(): 
+	username = request.json["username"]
+	username = username.lower()
+	user = Users.query.filter_by(user_username = username).first()
+	if user is None: 
+		return Response(status = 404) #User does not exist
+	items = []
+	for item in db.session.query(Sales, Items, Bin, Rack, Customers).join(Items, Sales.items_item_id == Items.item_id).join(Bin, Sales.bin_info_bin_id == Bin.bin_id).join(Rack, Sales.rack_info_rack_id == Rack.rack_id).join(Customers, Sales.customers_customer_id == Customers.customer_id):
+		items.append({
+			'transaction_id': item[0].transaction_id,
+			'transaction_date' : item[0].transaction_date,
+			'num_cartons': item[0].item_amount,
+			'tax_collected': item[0].tax_collected,
+			'revenue': item[0].revenue,
+			'item_name' : item[1].item_name,
+			'model_number' : item[1].model_number,
+			'bin_location' : item[2].bin_location,
+			'rack_location' : item[3].rack_location,
+			'customer_name': item[4].customer_name
+			}) 
+	return {
+		"items" : items
+	}, 200
+
+
+# Route: /api/admin/allSales, Get a list of all samples taken out
+# Method: POST (needed to verify user)
+# Expected Response: HTTP Status 200
+
+@app.route('/api/addTransaction', methods = ['POST'])
+def addTransaction(): 
+	#print(str(request.json))
+	form_type = request.json['form_type']
+	username = request.json["user"]
+	username = username.lower()
+	bin_location = request.json['bin_location']
+	rack_location = request.json['rack_location']
+	customer_name = request.json['customer_name']
+	model_number = request.json['model_number']
+	bin_location = request.json['bin_location']
+	num_cartons = request.json['num_cartons']
+	revenue = request.json['revenue']
+	isSample = request.json['sample']
+	tax_collected = request.json['tax_collected']
+
+	user = db.session.query(Users.user_id).filter(Users.user_username == username).scalar()
+	if user is None: 
+		return Response(status = 404) #User does not exist
+
+	bin_id = db.session.query(Bin.bin_id).filter(Bin.bin_location == bin_location).scalar()
+	rack_id = db.session.query(Rack.rack_id).filter(Rack.rack_location == rack_location).scalar()
+	form_item_id = db.session.query(Items.item_id).filter(Items.model_number == model_number).scalar()
+
+	if bin_id is None or rack_id is None or form_item_id is None:
+		return Response(status = 404) #item, bin or rack not found
+	
+	customer_id = db.session.query(Customers.customer_id).filter(Customers.customer_name == customer_name).scalar()
+
+	if form_type == 'Deposit':
+		newDeposit = Deposits(deposit_date = datetime.now().date(), item_id = form_item_id, num_cartons = num_cartons, bin_info_bin_id = bin_id, rack_info_rack_id = rack_id)
+		db.session.add(newDeposit)
+
+		# TODO change items table total quantity
+		# itemToUpdate = Items.query.filter_by(item_id = form_item_id).first() 
+		# itemToUpdate.quantity = request.json["quantity"]
+		db.session.query(Items).filter(Items.item_id == form_item_id).update({"quantity": Items.quantity + num_cartons})
+		# db.session.merge(itemToUpdate)
+		# db.session.commit()
+
+		db.session.commit()
+		return Response(status=200)
+	if isSample:
+		newSample = Samples(withdraw_date = datetime.now().date(), item_amount = num_cartons, items_item_id = form_item_id, bin_info_bin_id = bin_id, rack_info_rack_id = rack_id, users_user_id = user)
+		db.session.add(newSample)
+		db.session.commit()
+		return Response(status=200)
+	else:
+		# new sale
+		newSale = Sales(transaction_date = datetime.now().date(), item_amount = num_cartons, tax_collected = tax_collected, revenue = revenue, items_item_id = form_item_id, bin_info_bin_id = bin_id, rack_info_rack_id = rack_id, customers_customer_id = customer_id, users_user_id = user)
+		db.session.add(newSale)
+		db.session.commit()
+		return Response(status=200)
+
 # Route: /api/searchItem/<query>, Returns all items that match the model_number or item_name
 # Method: GET
 # Param: query
 # Expected Response: HTTP Status 200
 @app.route('/api/searchItemModel/<query>')
 def searchItem(query):
-    query = query.lower()
-    items = []
-    for item in Items.query.all():
-        if (query in str(item.model_number).lower()) or (query in str(item.item_name).lower()):
-            items.append({
-                'Item Name' : item.item_name,
-                'Item Model Num': item.model_number,
-                'Item Quantity' : item.quantity
+	query = query.lower()
+	items = []
+	for item in Items.query.all():
+		if (query in str(item.model_number).lower()) or (query in str(item.item_name).lower()):
+			items.append({
+                'Item ID': item.item_id,
+				'Item Name' : item.item_name,
+				'Item Model Num': item.model_number,
+				'Item Quantity' : item.quantity
                 })
-    return {
+	return {
         "items" : items
     }, 200
 

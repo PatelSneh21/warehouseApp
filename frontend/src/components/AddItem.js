@@ -24,34 +24,6 @@ function AddItem() {
         console.log(invItem)
       }
 
-    // function onChangeItemName(e) {
-    //     setInvItem({
-    //     item_name: e.target.value,
-        
-    //     });
-    //     console.log(invItem);
-    // }
-
-    // function onChangeModelNumber(e) {
-    //     setInvItem({
-    //         model_number: e.target.value,
-    //     });
-    //     console.log(invItem);
-    // }
-
-    // function onChangeItemPrice(e) {
-    //     setInvItem({
-    //         item_price: e.target.value,
-    //     });
-    //     console.log(invItem);
-    // }
-
-    // function onChangeItemQuantity(e) {
-    //     setInvItem({
-    //         quantity: e.target.value,
-    //     });
-    // }
-
 // This function will handle the submission.
     function onSubmit(e) {
         e.preventDefault();

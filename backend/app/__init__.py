@@ -81,6 +81,7 @@ class Items(db.Model):
 	model_number = db.Column(db.String(120))
 	item_price = db.Column(db.Float)
 	quantity = db.Column(db.Integer)
+	minQuantity = db.Column(db.Integer)
 	# bin_location = db.relationship('Bin', secondary = itemLocations, backref = db.backref(('itemInBin'), lazy = 'dynamic'))
 
 class Customers(db.Model):
@@ -142,6 +143,25 @@ app.register_blueprint(views.views)
 def status():
 	print("Application Server Running")
 	return Response(status = 200) 
+
+
+@app.route('/api/getAllBelowMinQuantity', methods=['GET'])
+def getAllBelowMinQuantity():
+	if "username" in session is None:
+		return Response(status=404)
+
+	itemAlerts = []
+	for item in Items.query.all():
+		if (item.quantity <= item.minQuantity):
+			itemAlerts.append({
+				'item_id': item.item_id,
+				'item_name' : item.item_name,
+				'model_number': item.model_number
+				}) 
+
+	return {
+		"items" : itemAlerts
+	}, 200
 
 
 # Route: /api/signup, Used to sign up a user into the system

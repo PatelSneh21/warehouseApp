@@ -26,8 +26,6 @@ app.permanent_session_lifetime = timedelta(days = 5) #A user who clicks remember
 
 #UNCOMMENT THIS FOR WINDOWS/MAYBE LINUX
 # app.config['SQLALCHEMY_DATABASE_URI'] = "mysql://root:@127.0.0.1:3306/mydb"
-
-# VERSION FOR AWS DEPLOYMENT
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://root:root@0.0.0.0:3306/mydb"
 
 #UNCOMMENT THIS FOR MAC
@@ -43,8 +41,9 @@ salt = "temp"
 #Database Setup:
 db = SQLAlchemy(app) # flask-sqlalchemy
 
-Base = automap_base()
-Base.prepare(db.engine, reflect=True)
+
+# Base = automap_base()
+# Base.prepare(db.engine, reflect=True)
 
 #Database Setup:
 #Defines all the tables in the db, used in running SQLAlchemy Queries
@@ -146,34 +145,39 @@ def status():
 
 
 # Route: /api/signup, Used to sign up a user into the system
-# Method: GET
+# Method: POST
 # Expected Response: User added to database, user added to session, status code 202 (Created object)
-@app.route('/api/signup', methods =['GET', 'POST'])
+@app.route('/api/signup', methods =['POST'])
 def signup():
-	#Handles being POSTed user data from the form
-	if request.method == 'POST':
-		if "username" in session:
-			return Response(status = 300) #User is already logged in, redirect them to dashboard
+	user_username = request.json['user_username']
+	user_name = request.json['user_name']
+	user_type = request.json['user_type']
+	user_password = request.json['user_password']
 
-		username = request.json["username"]
-		username = username.lower() #Data cleaning
-		name = request.json["name"]
-		userType = request.json["userType"]
-		password = request.json["password"]
-		password_hashed = generate_password_hash(password + salt, method = 'sha256')
-		#Input validations to check the data received from the frontend, for the time being generic error 404 is being returned
-		if (name == "" or userType == "" or username == "" or password == ""): #No field can be left blank
-			return Response(status=404)
-
-		if (Users.query.filter_by(user_username = username).first() is None): #Ensures there is no other user with the same username
-			newUser = Users(user_username = username, user_password = password_hashed, user_name = name, user_type = userType)
-			db.session.add(newUser)
-			db.session.commit()
-
-			session["username"] = username 	
-			return Response(status = 202)  #Return a status code 202
-
+	#Input validations to check the data received from the frontend, for the time being generic error 404 is being returned
+	if (user_name == "" or user_username == "" or user_type == "" or user_password == ""): #No field can be left blank
+		return Response(status=404)
+	
+	if (Users.query.filter_by(user_username = user_username).first() is not None): #Ensures there is no other user with the same username
 		return Response(status = 404) #Username already exists
+
+	newUser = Users(user_username = user_username, user_name = user_name, user_password = user_password, user_type = user_type)
+	db.session.add(newUser)
+	db.session.commit()
+
+	users = []
+	for user in Users.query.all():
+		users.append({
+			'user_id': user.user_id,
+			'user_username' : user.user_username,
+			'user_name': user.user_name,
+			'user_type': user.user_type,
+			}) 
+	return {
+		"users" : users
+	}, 200
+
+	#Handles being POSTed user data from the form
 
 
 # Route: /api/login, Used to login an existing user 
@@ -309,22 +313,27 @@ def addItem():
 		return Response(status=200)
 
 
-# Route: /api/admin/allUsers, Get a list of users in the system
-# Method: GET
+# Route: /api/allUsers, Get a list of users in the system
+# Method: POST
 # Expected Response: HTTP Status 200
-@app.route('/api/admin/allUsers')
+@app.route('/api/allUsers', methods = ['POST'])
 def allUsers(): 
-	if ("username" in session):
-		current_user = Users.query.filter_by(user_username = session["username"]).first()
-		if (current_user.user_type != "Admin"): #Ensure only admins can see list of all users
-			return Response(status=404)
-		else:	
-			users = Users.query.all()
-			print(users)
-				
-			return 200
-	else:
-		return Response(status=404)
+	username = request.json["username"]
+	username = username.lower()
+	myuser = Users.query.filter_by(user_username = username).first()
+	if myuser is None: 
+		return Response(status = 404) #User does not exist
+	users = []
+	for user in Users.query.all():
+		users.append({
+			'user_id': user.user_id,
+			'user_username' : user.user_username,
+			'user_name': user.user_name,
+			'user_type': user.user_type,
+			}) 
+	return {
+		"users" : users
+	}, 200
 
 
 # Route: /api/admin/allItems, Get a list of items in the system
@@ -349,6 +358,99 @@ def allItems():
 			}) 
 	return {
 		"items" : items
+	}, 200
+
+
+# Route: /api/allBins, Get a list of bins in the system
+# Method: POST
+# Expected Response: HTTP Status 200
+
+@app.route('/api/allBins', methods = ['POST'])
+def allBins(): 
+	username = request.json["username"]
+	username = username.lower()
+	user = Users.query.filter_by(user_username = username).first()
+	if user is None: 
+		return Response(status = 404) #User does not exist
+	bins = []
+	for bin in Bin.query.all():
+		rack_location = db.session.query(Rack.rack_location).filter(Rack.rack_id == bin.rack_info_rack_id).scalar()
+		bins.append({
+			'bin_id': bin.bin_id,
+			'bin_height' : bin.bin_height,
+			'bin_location': bin.bin_location,
+			'rack_location': rack_location,
+			}) 
+	return {
+		"bins" : bins
+	}, 200
+
+
+# Route: /api/allRacks, Get a list of racks in the system
+# Method: POST
+# Expected Response: HTTP Status 200
+
+@app.route('/api/allRacks', methods = ['POST'])
+def allRacks(): 
+	username = request.json["username"]
+	username = username.lower()
+	user = Users.query.filter_by(user_username = username).first()
+	if user is None: 
+		return Response(status = 404) #User does not exist
+	racks = []
+	for rack in Rack.query.all():
+		racks.append({
+			'rack_id': rack.rack_id,
+			'rack_location': rack.rack_location,
+			}) 
+	return {
+		"racks" : racks
+	}, 200
+
+
+# Route: /api/allCustomers, Get a list of customers in the system
+# Method: POST
+# Expected Response: HTTP Status 200
+@app.route('/api/allCustomers', methods = ['POST'])
+def allCustomers(): 
+	username = request.json["username"]
+	username = username.lower()
+	user = Users.query.filter_by(user_username = username).first()
+	if user is None: 
+		return Response(status = 404) #User does not exist
+	customers = []
+	for customer in Customers.query.all():
+		customers.append({
+			'customer_id': customer.customer_id,
+			'customer_name': customer.customer_name,
+			}) 
+	return {
+		"customers" : customers
+	}, 200
+
+
+# Route: /api/allCartons, Get a list of master cartons in the system
+# Method: POST
+# Expected Response: HTTP Status 200
+@app.route('/api/allCartons', methods = ['POST'])
+def allCartons(): 
+	username = request.json["username"]
+	username = username.lower()
+	user = Users.query.filter_by(user_username = username).first()
+	if user is None: 
+		return Response(status = 404) #User does not exist
+	cartons = []
+	for carton in Master_Cartons.query.all():
+		item = Items.query.filter_by(item_id = carton.items_item_id).first()
+		cartons.append({
+			'carton_id': carton.carton_id,
+			'carton_size': carton.carton_size,
+			'num_items': carton.num_items,
+			'model_number': item.model_number,
+			'item_name': item.item_name,
+			}) 
+	return {
+		"cartons" : cartons
 	}, 200
 
 
@@ -394,7 +496,7 @@ def allDeposits():
 	}, 200
 
 
-# Route: /api/admin/allSamples, Get a list of all samples taken out
+# Route: /api/allSamples, Get a list of all samples taken out
 # Method: POST (needed to verify user)
 # Expected Response: HTTP Status 200
 
@@ -528,6 +630,88 @@ def searchItem(query):
                 })
 	return {
         "items" : items
+    }, 200
+
+# Route: /api/searchBin/<query>, Returns all bins that match any attribute
+# Method: GET
+# Param: query
+# Expected Response: HTTP Status 200
+@app.route('/api/searchBin/<query>')
+def searchBin(query):
+	query = query.lower()
+	bins = []
+	for bin in Bin.query.all():
+		rack_location = db.session.query(Rack.rack_location).filter(Rack.rack_id == bin.rack_info_rack_id).scalar()
+		if (query in str(rack_location).lower()) or (query in str(bin.bin_height).lower()) or (query in str(bin.bin_location).lower()):
+			bins.append({
+                'bin_id': bin.bin_id,
+				'bin_height' : bin.bin_height,
+				'bin_location': bin.bin_location,
+				'rack_location': rack_location,
+                })
+	return {
+        "bins" : bins
+    }, 200
+
+
+# Route: /api/searchRack/<query>, Returns all racks that match any attribute
+# Method: GET
+# Param: query
+# Expected Response: HTTP Status 200
+@app.route('/api/searchRack/<query>')
+def searchRack(query):
+	query = query.lower()
+	racks = []
+	for rack in Rack.query.all():
+		if (query in str(rack.rack_location).lower()):
+			racks.append({
+				'rack_id': rack.rack_id,
+				'rack_location': rack.rack_location,
+                })
+	return {
+        "racks" : racks
+    }, 200
+
+
+# Route: /api/searchCustomer/<query>, Returns all customers that match any attribute
+# Method: GET
+# Param: query
+# Expected Response: HTTP Status 200
+@app.route('/api/searchCustomer/<query>')
+def searchCustomer(query):
+	query = query.lower()
+	customers = []
+	for customer in Customers.query.all():
+		if (query in str(customer.customer_name).lower()):
+			customers.append({
+				'customer_id': customer.customer_id,
+				'customer_name': customer.customer_name,
+                })
+	return {
+        "customers" : customers
+    }, 200
+
+
+# Route: /api/searchCarton/<query>, Returns all cartons that match any attribute
+# Method: GET
+# Param: query
+# Expected Response: HTTP Status 200
+@app.route('/api/searchCarton/<query>')
+def searchCarton(query):
+	query = query.lower()
+	cartons = []
+	for carton in Master_Cartons.query.all():
+		item = Items.query.filter_by(item_id = carton.items_item_id).first()
+		if (query in str(carton.num_items).lower() or query in str(carton.carton_size).lower() or query in str(item.model_number).lower() or query in str(item.item_name).lower()):
+			cartons.append({
+				'carton_id': carton.carton_id,
+				'carton_size': carton.carton_size,
+				'num_items': carton.num_items,
+				'model_number': item.model_number,
+				'item_name': item.item_name,
+            })
+	return {
+        "cartons" : cartons
     }, 200
 
 # Route: /api/findItem/<model_num>, Get a list of locations of items in the system
@@ -747,59 +931,159 @@ def editMasterCarton():
 		return Response(status=404)
 
 
-# Route: /api/admin/addBin, Add a new bin in the database
+# Route: /api/addBin, Add a new bin in the database
 # Method: POST
 # Requested Data:
 #	bin_height: Integer
 #	bin_location: String
 #	rack_info_rack_id: Integer
 # Expected Response: HTTP Status 200
-@app.route('/api/admin/addBin', methods = ['POST'])
+@app.route('/api/addBin', methods = ['POST'])
 def addBin(): 
-	if ("username" in session):
-		current_user = Users.query.filter_by(user_username = session["username"]).first()
+	bin_height = request.json["bin_height"]
+	bin_location = request.json["bin_location"]
+	rack_location = request.json['rack_location']
+	rack_info_rack_id = db.session.query(Rack.rack_id).filter(Rack.rack_location == rack_location).scalar()
+	newBin = Bin(bin_height = bin_height, bin_location = bin_location, rack_info_rack_id = rack_info_rack_id)
 
-		if (current_user.user_type != "Admin"): #Ensure only admins can add bin
-			return Response(status=404)
+	db.session.add(newBin)
+	db.session.commit()
 
-		else: 
-			bin_height = request.json["bin_height"]
-			bin_location = request.json["bin_location"]
-			rack_info_rack_id = request.json['rack_info_rack_id']
-			newBin = Bin(bin_height = bin_height, bin_location = bin_location, rack_info_rack_id = rack_info_rack_id)
+	bins = []
+	for bin in Bin.query.all():
+		rack_location = db.session.query(Rack.rack_location).filter(Rack.rack_id == bin.rack_info_rack_id).scalar()
+		bins.append({
+			'bin_id': bin.bin_id,
+			'bin_height' : bin.bin_height,
+			'bin_location': bin.bin_location,
+			'rack_location': rack_location,
+			})
+	return {
+		"bins" : bins
+	}, 200
 
-			db.session.add(newBin)
-			db.session.commit()
 
-			return Response(status=200)
-	else:
-		return Response(status=404)
-
-
-# Route: /api/admin/addRack, Add a new rack in in the database
+# Route: /api/addRack, Add a new rack in the database
 # Method: POST
 # Requested Data:
-#	bin_height: Integer
 #	rack_location: String
 # Expected Response: HTTP Status 200
-@app.route('/api/admin/addRack', methods = ['POST'])
+@app.route('/api/addRack', methods = ['POST'])
 def addRack(): 
-	if ("username" in session):
-		current_user = Users.query.filter_by(user_username = session["username"]).first()
+	rack_location = request.json['rack_location']
+	newRack = Rack(rack_location = rack_location)
+	db.session.add(newRack)
+	db.session.commit()
 
-		if (current_user.user_type != "Admin"): #Ensure only admins can add rack
-			return Response(status=404)
+	racks = []
+	for rack in Rack.query.all():
+		racks.append({
+			'rack_id': rack.rack_id,
+			'rack_location': rack.rack_location,
+			})
+	return {
+		"racks" : racks
+	}, 200
 
-		else: 
-			rack_location = request.json["bin_height"]
-			newRack = Rack(rack_location = rack_location)
 
-			db.session.add(newRack)
-			db.session.commit()
+# Route: /api/addCustomer, Add a new customer in the database
+# Method: POST
+# Requested Data:
+#	customer_name: String
+# Expected Response: HTTP Status 200
+@app.route('/api/addCustomer', methods = ['POST'])
+def addCustomer(): 
+	customer_name = request.json['customer_name']
+	newCustomer = Customers(customer_name = customer_name)
+	db.session.add(newCustomer)
+	db.session.commit()
+
+	customers = []
+	for customer in Customers.query.all():
+		customers.append({
+			'customer_id': customer.customer_id,
+			'customer_name': customer.customer_name,
+			})
+	return {
+		"customers" : customers
+	}, 200
+
+
+# Route: /api/addCarton, Add a new carton in the database
+# Method: POST
+# Requested Data:
+#	customer_name: String
+# Expected Response: HTTP Status 200
+@app.route('/api/addCarton', methods = ['POST'])
+def addCartonn(): 
+	carton_size = request.json['carton_size']
+	num_items = request.json['num_items']
+	model_number = request.json['model_number']
+	item = Items.query.filter_by(model_number = model_number).first()
+	items_item_id = item.item_id
+	newCarton = Master_Cartons(carton_size = carton_size, num_items = num_items, items_item_id = items_item_id)
+	db.session.add(newCarton)
+	db.session.commit()
+
+	cartons = []
+	for carton in Master_Cartons.query.all():
+		item = Items.query.filter_by(item_id = carton.items_item_id).first()
+		cartons.append({
+			'carton_id': carton.carton_id,
+			'carton_size': carton.carton_size,
+			'num_items': carton.num_items,
+			'model_number': item.model_number,
+			'item_name': item.item_name,
+			}) 
+	return {
+		"cartons" : cartons
+	}, 200
+
+
+	# if ("username" in session):
+	# 	current_user = Users.query.filter_by(user_username = session["username"]).first()
+
+	# 	if (current_user.user_type != "Admin"): #Ensure only admins can add bin
+	# 		return Response(status=404)
+
+	# 	else: 
+	# 		bin_height = request.json["bin_height"]
+	# 		bin_location = request.json["bin_location"]
+	# 		rack_info_rack_id = request.json['rack_info_rack_id']
+	# 		newBin = Bin(bin_height = bin_height, bin_location = bin_location, rack_info_rack_id = rack_info_rack_id)
+
+	# 		db.session.add(newBin)
+	# 		db.session.commit()
+
+	# 		return Response(status=200)
+	# else:
+	# 	return Response(status=404)
+
+
+# # Route: /api/admin/addRack, Add a new rack in in the database
+# # Method: POST
+# # Requested Data:
+# #	bin_height: Integer
+# #	rack_location: String
+# # Expected Response: HTTP Status 200
+# @app.route('/api/admin/addRack', methods = ['POST'])
+# def addRack(): 
+# 	if ("username" in session):
+# 		current_user = Users.query.filter_by(user_username = session["username"]).first()
+
+# 		if (current_user.user_type != "Admin"): #Ensure only admins can add rack
+# 			return Response(status=404)
+
+# 		else: 
+# 			rack_location = request.json["bin_height"]
+# 			newRack = Rack(rack_location = rack_location)
+
+# 			db.session.add(newRack)
+# 			db.session.commit()
 			
-			return Response(status=200)
-	else:
-		return Response(status=404)
+# 			return Response(status=200)
+# 	else:
+# 		return Response(status=404)
 
 
 #Application run stuff, in debug mode for now. TURN DEBUG MODE OFF PRIOR TO PRODUCTION, MAKES APP VULNERABLE 

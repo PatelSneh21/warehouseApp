@@ -17,7 +17,7 @@ function LeftNav(props) {
         "username" : state.user.email
     }
 
-    const [isAdmin, setAdmin] = useState(true);
+    const [isAdmin, setAdmin] = useState(false);
 
     useEffect(() => {
         fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/checkPrivilages',

@@ -95,6 +95,7 @@ function InventoryPage() {
         }).then(response => response.json())  
         .then(data => {
           setInvItems({items: data.items});
+          //console.log(data.items)
         })
         .catch(error => console.log(error));
         
@@ -103,6 +104,7 @@ function InventoryPage() {
 
   // This method will map out the recent sales onto the table
   function itemList(collection) {
+    //console.log(collection)
     return collection.items.map((currentitem) => {
         return (
         <Item

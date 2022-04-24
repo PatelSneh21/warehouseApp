@@ -16,6 +16,11 @@ import InventoryPage from './components/InventoryPage';
 import AddItem from './components/AddItem';
 import ManageWarehouse from './components/ManageWarehouse';
 import AddTransaction from './components/AddTransaction';
+import ManageBins from './components/ManageBins';
+import ManageRacks from './components/ManageRacks';
+import ManageCartons from './components/ManageCartons';
+import ManageCustomers from './components/ManageCustomers';
+import ManageUsers from './components/ManageUsers';
 import 'bootstrap';
 import 'bootstrap/dist/js/bootstrap.js';
 
@@ -30,10 +35,13 @@ ReactDOM.render(
         <Route path="history" element={<HistoryPage />} />
         <Route path="inventory" element={<InventoryPage />} />
         <Route path="addItem" element={<AddTransaction />} />
-        <Route path="manage" element={<ManageWarehouse />}>
-          <Route path="items" element={<AddItem />} />
-        </Route>
-        
+        <Route path="manage/items" element={<AddItem />} />
+        <Route path="manage/bins" element={<ManageBins />} />
+        <Route path="manage/racks" element={<ManageRacks />} />
+        <Route path="manage/customers" element={<ManageCustomers />} />
+        <Route path="manage/cartons" element={<ManageCartons />} />
+        <Route path="manage/users" element={<ManageUsers />} />
+        <Route path="manage" element={<ManageWarehouse />} />
       </Route>
 
       {/* <Route path="home" element={<Home />} />

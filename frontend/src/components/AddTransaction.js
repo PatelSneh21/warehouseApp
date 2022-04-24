@@ -56,7 +56,7 @@ function AddTransaction() {
     function onSubmit(e) {
         e.preventDefault();
         console.log(invItem)
-        fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/addTransaction',
+        fetch('"http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/addTransaction',
         {
           method:"POST",
           mode: 'cors',
@@ -202,80 +202,6 @@ function AddTransaction() {
             </form>
 
             </div>
-          {/* <div className="result-card">
-          <h3>Create New Transaction</h3>
-          <form onSubmit={onSubmit}>
-            <div className="form-group">
-              <label>Item name: </label>
-              <input
-                type="text"
-                className="form-control"
-                name = "item_name"
-                value={invItem.item_name}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Model Number: </label>
-              <input
-                type="number"
-                className="form-control"
-                name = "model_number"
-                value={invItem.model_number}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Item price: </label>
-              <input
-                type="number"
-                className="form-control"
-                name = "item_price"
-                value={invItem.item_price}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Item quantity: </label>
-              <input
-                type="number"
-                className="form-control"
-                name = "quantity"
-                value={invItem.quantity}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Sample: </label>
-              <input
-                type="checkbox"
-                className=""
-                name = "sample"
-                value={invItem.sample}
-                onChange={handleChange}
-              />
-            </div>
-
-
-
-            
-            {(success != "") ? ( <div className="successMsg">{success}</div>) : ""}
-            {(error != "") ? ( <div className="error">{error}</div>) : ""}
-            <div className="form-group">
-              <input
-                type="submit"
-                value="Create record"
-                className="btn"
-              />
-            </div>
-          </form>
-          <NavLink className="create-backbtn btn" role="button" aria-pressed="false" exact to="/home">
-            Back
-          </NavLink>
-        </div> */}
         </div>
         
       )

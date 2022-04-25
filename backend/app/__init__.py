@@ -1027,31 +1027,32 @@ def editItemInfo():
 	# else:
 	# 	return Response(status=404)
 
-
-# Route: /api/admin/editMasterCarton, Edit the info for an existing MC in the database
+	
+# Route: /api/editCarton, Edit the info for an existing master carton in the database
 # Method: POST
 # Requested Data:
 #	carton_id: Integer
 #	carton_size: Integer
+#	num_items: Integer
 # Expected Response: HTTP Status 200
-@app.route('/api/admin/editMasterCarton', methods = ['POST'])
-def editMasterCarton(): 
-	if ("username" in session):
-		current_user = Users.query.filter_by(user_username = session["username"]).first()
+@app.route('/api/editCarton', methods = ['POST'])
+def editCarton(): 
+	itemToUpdate = Master_Cartons.query.filter_by(carton_id = request.json["carton_id"]).first() 
+	itemToUpdate.carton_size = request.json['carton_size']
+	itemToUpdate.num_items = request.json["num_items"]
+	db.session.merge(itemToUpdate)
+	db.session.flush()
+	db.session.commit()
 
-		if (current_user.user_type != "Admin"): #Ensure only admins can see list of all users
-			return Response(status=404)
+	updatedItemInfo = {
+		"carton_size": itemToUpdate.carton_size,
+		"num_items" : itemToUpdate.num_items,
 
-		else: 
-			MCtoUpdate = Master_Cartons.query.filter_by(carton_id = request.json["carton_id"]).first() 
-			MCtoUpdate.carton_size = request.json['carton_size']
-			db.session.merge(MCtoUpdate)
-			db.session.flush()
-			db.session.commit()
+		}
 
-			return Response(status=200) #Item properly updated!
-	else:
-		return Response(status=404)
+	return {
+		"updatedCartonInfo" : updatedItemInfo
+		}, 200 #Master Carton properly updated!
 
 
 # Route: /api/addBin, Add a new bin in the database

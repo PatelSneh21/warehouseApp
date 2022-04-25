@@ -387,3 +387,12 @@ html {
 .form-group {
   margin-bottom: 10px;
 }
+
+ /* Begin widget styling */
+
+ .widgetcard {
+  overflow: scroll;
+  padding-bottom:40px;
+ }
+
+/* End widget styling */

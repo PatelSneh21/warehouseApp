@@ -498,9 +498,10 @@ def allDeposits():
 		return Response(status = 404) #User does not exist
 	items = []
 	for item in db.session.query(Deposits, Items, Bin, Rack).join(Items, Deposits.item_id == Items.item_id).join(Bin, Deposits.bin_info_bin_id == Bin.bin_id).join(Rack, Deposits.rack_info_rack_id == Rack.rack_id):
+		
 		items.append({
 			'deposit_id': item[0].deposit_id,
-			'deposit_date' : item[0].deposit_date,
+			'deposit_date' : str(item[0].deposit_date),
 			'num_cartons': item[0].num_cartons,
 			'item_name' : item[1].item_name,
 			'model_number' : item[1].model_number,
@@ -527,7 +528,7 @@ def allSamples():
 	for item in db.session.query(Samples, Items, Bin, Rack, Users).join(Items, Samples.items_item_id == Items.item_id).join(Bin, Samples.bin_info_bin_id == Bin.bin_id).join(Rack, Samples.rack_info_rack_id == Rack.rack_id).join(Users, Samples.users_user_id == Users.user_id):
 		items.append({
 			'sample_id': item[0].sample_id,
-			'withdraw_date' : item[0].withdraw_date,
+			'withdraw_date' : str(item[0].withdraw_date),
 			'num_cartons': item[0].item_amount,
 			'item_name' : item[1].item_name,
 			'model_number' : item[1].model_number,
@@ -540,7 +541,7 @@ def allSamples():
 	}, 200
 
 
-# Route: /api/admin/allSales, Get a list of all samples taken out
+# Route: /api/admin/allSales, Get a list of all sales
 # Method: POST (needed to verify user)
 # Expected Response: HTTP Status 200
 
@@ -555,7 +556,7 @@ def allSales():
 	for item in db.session.query(Sales, Items, Bin, Rack, Customers).join(Items, Sales.items_item_id == Items.item_id).join(Bin, Sales.bin_info_bin_id == Bin.bin_id).join(Rack, Sales.rack_info_rack_id == Rack.rack_id).join(Customers, Sales.customers_customer_id == Customers.customer_id):
 		items.append({
 			'transaction_id': item[0].transaction_id,
-			'transaction_date' : item[0].transaction_date,
+			'transaction_date' : str(item[0].transaction_date),
 			'num_cartons': item[0].item_amount,
 			'tax_collected': item[0].tax_collected,
 			'revenue': item[0].revenue,
@@ -564,6 +565,53 @@ def allSales():
 			'bin_location' : item[2].bin_location,
 			'rack_location' : item[3].rack_location,
 			'customer_name': item[4].customer_name
+			}) 
+	return {
+		"items" : items
+	}, 200
+
+
+# Route: /api/salesWidget, Get a list of all samples taken out
+# Method: GET
+# Expected Response: HTTP Status 200
+
+@app.route('/api/salesWidget')
+def salesWidget(): 
+	items = []
+	for item in db.session.query(Sales, Items, Bin, Rack, Customers).join(Items, Sales.items_item_id == Items.item_id).join(Bin, Sales.bin_info_bin_id == Bin.bin_id).join(Rack, Sales.rack_info_rack_id == Rack.rack_id).join(Customers, Sales.customers_customer_id == Customers.customer_id).limit(5).all():
+		items.append({
+			'transaction_id': item[0].transaction_id,
+			'transaction_date' : str(item[0].transaction_date),
+			'num_cartons': item[0].item_amount,
+			'tax_collected': item[0].tax_collected,
+			'revenue': item[0].revenue,
+			'item_name' : item[1].item_name,
+			'model_number' : item[1].model_number,
+			'bin_location' : item[2].bin_location,
+			'rack_location' : item[3].rack_location,
+			'customer_name': item[4].customer_name
+			}) 
+	return {
+		"items" : items
+	}, 200
+
+
+# Route: /api/purchaseWidget, Get a list of all samples taken out
+# Method: GET
+# Expected Response: HTTP Status 200
+
+@app.route('/api/purchaseWidget')
+def purchaseWidget(): 
+	items = []
+	for item in db.session.query(Deposits, Items, Bin, Rack).join(Items, Deposits.item_id == Items.item_id).join(Bin, Deposits.bin_info_bin_id == Bin.bin_id).join(Rack, Deposits.rack_info_rack_id == Rack.rack_id).limit(5).all():
+		items.append({
+			'deposit_id': item[0].deposit_id,
+			'deposit_date' : str(item[0].deposit_date),
+			'num_cartons': item[0].num_cartons,
+			'item_name' : item[1].item_name,
+			'model_number' : item[1].model_number,
+			'bin_location' : item[2].bin_location,
+			'rack_location' : item[3].rack_location,
 			}) 
 	return {
 		"items" : items
@@ -664,7 +712,7 @@ def searchDeposit(query):
 		if (query in str(item[1].model_number).lower() or query in str(item[0].deposit_date) or query in str(item[1].item_name).lower() or query in str(item[2].bin_location).lower()):
 			items.append({
                 'deposit_id': item[0].deposit_id,
-				'deposit_date' : item[0].deposit_date,
+				'deposit_date' : str(item[0].deposit_date),
 				'num_cartons': item[0].num_cartons,
 				'item_name' : item[1].item_name,
 				'model_number' : item[1].model_number,
@@ -689,7 +737,7 @@ def searchSample(query):
 		if (query in str(item[1].model_number).lower() or query in str(item[0].withdraw_date) or query in str(item[1].item_name).lower() or query in str(item[2].bin_location).lower()):
 			items.append({
 			'sample_id': item[0].sample_id,
-			'withdraw_date' : item[0].withdraw_date,
+			'withdraw_date' : str(item[0].withdraw_date),
 			'num_cartons': item[0].item_amount,
 			'item_name' : item[1].item_name,
 			'model_number' : item[1].model_number,
@@ -714,7 +762,7 @@ def searchSales(query):
 		if (query in str(item[1].model_number).lower() or query in str(item[0].transaction_date) or query in str(item[1].item_name).lower() or query in str(item[2].bin_location).lower()):
 			items.append({
 			'transaction_id': item[0].transaction_id,
-			'transaction_date' : item[0].transaction_date,
+			'transaction_date' : str(item[0].transaction_date),
 			'num_cartons': item[0].item_amount,
 			'tax_collected': item[0].tax_collected,
 			'revenue': item[0].revenue,
@@ -928,7 +976,7 @@ def transactionHistory():
 			for transaction in Sales.query.all():
 				transactionHistory.append({
 					"transaction_id" : transaction.transaction_id,
-					"transaction_date" : transaction.transaction_date,
+					"transaction_date" : str(transaction.transaction_date),
 					"item_amount" : transaction.item_amount,
 					"tax_collected" : transaction.tax_collected,
 					"revenue" : transaction.revenue,
@@ -1026,6 +1074,33 @@ def editItemInfo():
 
 	# else:
 	# 	return Response(status=404)
+
+
+# Route: /api/admin/editMasterCarton, Edit the info for an existing MC in the database
+# Method: POST
+# Requested Data:
+#	carton_id: Integer
+#	carton_size: Integer
+# Expected Response: HTTP Status 200
+@app.route('/api/admin/editMasterCarton', methods = ['POST'])
+def editMasterCarton(): 
+	if ("username" in session):
+		current_user = Users.query.filter_by(user_username = session["username"]).first()
+
+		if (current_user.user_type != "Admin"): #Ensure only admins can see list of all users
+			return Response(status=404)
+
+		else: 
+			MCtoUpdate = Master_Cartons.query.filter_by(carton_id = request.json["carton_id"]).first() 
+			MCtoUpdate.carton_size = request.json['carton_size']
+			db.session.merge(MCtoUpdate)
+			db.session.flush()
+			db.session.commit()
+
+			return Response(status=200) #Item properly updated!
+	else:
+		return Response(status=404)
+
 
 	
 # Route: /api/editCarton, Edit the info for an existing master carton in the database

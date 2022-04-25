@@ -4,31 +4,31 @@ import React, {useState, useEffect} from 'react'
 const Item = (props) => (
     <tr>
       <td>{props.item.item_name}</td>
-      <td>${props.item.item_revenue}</td>
+      <td>{props.item.num_cartons}</td>
+      <td>${props.item.revenue}</td>
     </tr>
   );
 
 
 function SalesSummary() {
     const [salesItems, setSalesItems] = useState({
-        items: [{item_id:"1", item_name:"abc", item_revenue:"123"}, 
-        {item_id:"2", item_name:"basdf", item_revenue:"12323"}]
+        items: [{item_name:"", num_cartons:"", item_revenue:""}]
     });
 
-    //TODO CHANGE TO ACTUAL ENDPOINT
-    // useEffect(() => {
-    //     fetch('http://example.com/movies.json')
-    //     .then((response) =>{
-    //         setSalesItems({items: response.data});
-    //     }).catch(error => console.log(error));
-    // }, []);
+    useEffect(() => {
+        fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/salesWidget')
+        .then(response => response.json())  
+        .then(data => {
+            setSalesItems({items: data.items});
+        }).catch(error => console.log(error));
+    }, []);
 
     // This method will map out the recent sales onto the table
     function itemList(collection) {
         return collection.items.map((currentitem) => {
             return (
             <Item
-            key={currentitem._id}
+            key={currentitem["transaction_id"]}
             item={currentitem}
             />
             );
@@ -36,12 +36,13 @@ function SalesSummary() {
     }
 
     return (
-        <div className="home-card">
+        <div className="home-card widgetcard">
             <h2>Recent Sales</h2>
             <table className="table table-striped" >
             <thead>
                 <tr>
                 <th className="itemCol-recent">Item</th>
+                <th className="itemCol-recent">Cartons</th>
                 <th className="dateCol-recent">Revenue</th>
                 </tr>
             </thead>

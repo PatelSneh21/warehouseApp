@@ -44,7 +44,7 @@ function Alerts() {
 
 
   return (
-    <div className='home-card'>
+    <div className='home-card widgetcard'>
       <h2>Alerts</h2>
       {hasAlerts && 
       <p>Low Inventory</p>

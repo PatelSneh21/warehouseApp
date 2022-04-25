@@ -21,10 +21,10 @@ function HomeContent() {
         <div className="purchases-grid">
             <PurchasesSummary />
         </div>
-        
+{/*         
         <div className="history-grid">
             <HistorySummary/>
-        </div>
+        </div> */}
     </div>
             
   )

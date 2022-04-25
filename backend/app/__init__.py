@@ -42,8 +42,8 @@ salt = "temp"
 db = SQLAlchemy(app) # flask-sqlalchemy
 
 
-# Base = automap_base()
-# Base.prepare(db.engine, reflect=True)
+Base = automap_base()
+Base.prepare(db.engine, reflect=True)
 
 #Database Setup:
 #Defines all the tables in the db, used in running SQLAlchemy Queries
@@ -147,18 +147,15 @@ def status():
 
 @app.route('/api/getAllBelowMinQuantity', methods=['GET'])
 def getAllBelowMinQuantity():
-	if "username" in session is None:
-		return Response(status=404)
-
 	itemAlerts = []
 	for item in Items.query.all():
 		if (item.quantity <= item.minQuantity):
 			itemAlerts.append({
 				'item_id': item.item_id,
 				'item_name' : item.item_name,
-				'model_number': item.model_number
+				'model_number': item.model_number,
+				'quantity': item.quantity
 				}) 
-
 	return {
 		"items" : itemAlerts
 	}, 200
@@ -323,7 +320,8 @@ def addItem():
 		model_number = request.json["model_number"]
 		item_price = request.json['item_price']
 		quantity = request.json["quantity"]
-		newItem = Items(item_name = item_name, model_number = model_number, item_price = item_price, quantity = quantity)
+		minQuantity = request.json["minQuantity"]
+		newItem = Items(item_name = item_name, model_number = model_number, item_price = item_price, quantity = quantity, minQuantity = minQuantity)
 
 		# itemLocation = Bin.query.filter_by(bin_location = request.json["bin_id"]).first()
 		# if itemLocation != None: 
@@ -374,7 +372,8 @@ def allItems():
 			'Item Name' : item.item_name,
 			'Item Model Num': item.model_number,
 			'Item Price': item.item_price,
-			'Item Quantity' : item.quantity
+			'Item Quantity' : item.quantity,
+			'Minimum Quantity' : item.minQuantity
 			}) 
 	return {
 		"items" : items
@@ -468,6 +467,7 @@ def allCartons():
 			'num_items': carton.num_items,
 			'model_number': item.model_number,
 			'item_name': item.item_name,
+			'min_quantity': item.minQuantity
 			}) 
 	return {
 		"cartons" : cartons
@@ -623,12 +623,14 @@ def addTransaction():
 	if isSample:
 		newSample = Samples(withdraw_date = datetime.now().date(), item_amount = num_cartons, items_item_id = form_item_id, bin_info_bin_id = bin_id, rack_info_rack_id = rack_id, users_user_id = user)
 		db.session.add(newSample)
+		db.session.query(Items).filter(Items.item_id == form_item_id).update({"quantity": Items.quantity - num_cartons})
 		db.session.commit()
 		return Response(status=200)
 	else:
 		# new sale
 		newSale = Sales(transaction_date = datetime.now().date(), item_amount = num_cartons, tax_collected = tax_collected, revenue = revenue, items_item_id = form_item_id, bin_info_bin_id = bin_id, rack_info_rack_id = rack_id, customers_customer_id = customer_id, users_user_id = user)
 		db.session.add(newSale)
+		db.session.query(Items).filter(Items.item_id == form_item_id).update({"quantity": Items.quantity - num_cartons})
 		db.session.commit()
 		return Response(status=200)
 
@@ -646,7 +648,8 @@ def searchItem(query):
                 'Item ID': item.item_id,
 				'Item Name' : item.item_name,
 				'Item Model Num': item.model_number,
-				'Item Quantity' : item.quantity
+				'Item Quantity' : item.quantity,
+				'Minimum Quantity': item.minQuantity
                 })
 	return {
         "items" : items
@@ -654,23 +657,45 @@ def searchItem(query):
 
 # Route: /api/searchBin/<query>, Returns all bins that match any attribute
 # Method: GET
-# Param: query
+# Param: query - the item id
 # Expected Response: HTTP Status 200
 @app.route('/api/searchBin/<query>')
 def searchBin(query):
 	query = query.lower()
-	bins = []
-	for bin in Bin.query.all():
+	result = []
+
+	data = {}
+	deposits = db.session.query(Deposits.bin_info_bin_id, Deposits.num_cartons).filter(Deposits.item_id == query).all()
+	withdrawals = db.session.query(Sales.bin_info_bin_id, Sales.item_amount).filter(Sales.items_item_id == query).all()
+	samples = db.session.query(Samples.bin_info_bin_id, Samples.item_amount).filter(Samples.items_item_id == query).all()
+
+	for item in deposits:
+		if item[0] in data:
+			data[item[0]] = data[item[0]] + item[1]
+		else: 
+			data[item[0]] = item[1]
+	for item in withdrawals:
+		if item[0] in data:
+			data[item[0]] = data[item[0]] - item[1]
+		else: 
+			data[item[0]] = -(item[1])
+	for item in samples:
+		if item[0] in data:
+			data[item[0]] = data[item[0]] - item[1]
+		else: 
+			data[item[0]] = -(item[1])
+
+	for entry in data:
+		bin = Bin.query.filter_by(bin_id = entry).first()
 		rack_location = db.session.query(Rack.rack_location).filter(Rack.rack_id == bin.rack_info_rack_id).scalar()
-		if (query in str(rack_location).lower()) or (query in str(bin.bin_height).lower()) or (query in str(bin.bin_location).lower()):
-			bins.append({
-                'bin_id': bin.bin_id,
-				'bin_height' : bin.bin_height,
-				'bin_location': bin.bin_location,
-				'rack_location': rack_location,
-                })
+		result.append({
+			'bin_location': bin.bin_location,
+			'rack_location': rack_location,
+			'num_cartons': data[entry]
+		})
+
 	return {
-        "bins" : bins
+        "bins" : result
     }, 200
 
 

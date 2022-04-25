@@ -11,6 +11,7 @@ function AddItem() {
         model_number: "",
         item_price: "",
         quantity: 0,
+        minQuantity: ""
       });
 
       // state for adding a new carton
@@ -33,7 +34,7 @@ function AddItem() {
         const item = e.target.name;
         const value = e.target.value;
         setInvItem(values => ({...values, [item]:value}))
-        console.log(invItem)
+        //console.log(invItem)
       }
 
       const navigate = useNavigate();
@@ -46,7 +47,7 @@ function AddItem() {
     function onSubmit(e) {
         e.preventDefault();
 
-        fetch('"http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/addItem',
+        fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/addItem',
         {
           method:"POST",
           mode: 'cors',
@@ -61,6 +62,7 @@ function AddItem() {
                     model_number: "",
                     item_price:"",
                     quantity: 0,
+                    minQuantity: ""
                 });
                 setSucess("Item successfully added");
             } else {
@@ -85,7 +87,7 @@ function AddItem() {
     function onSubmitCarton(e) {
       e.preventDefault();
 
-      fetch('"http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/addCarton',
+      fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/addCarton',
       {
         method:"POST",
         mode: 'cors',
@@ -137,7 +139,7 @@ function AddItem() {
             <div className="form-group">
               <label>Model number: </label>
               <input
-                type="number"
+                type="text"
                 className="form-control"
                 name = "model_number"
                 value={invItem.model_number}
@@ -163,6 +165,16 @@ function AddItem() {
                 className="form-control"
                 name = "quantity"
                 value={invItem.quantity}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-group">
+              <label>Minimum quantity before reorder alert: </label>
+              <input
+                type="number"
+                className="form-control"
+                name = "minQuantity"
+                value={invItem.minQuantity}
                 onChange={handleChange}
               />
             </div>

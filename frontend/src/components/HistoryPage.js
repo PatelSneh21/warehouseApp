@@ -68,7 +68,7 @@ const [sampleItems, setSampleItems] = useState({
 });
 
   useEffect(() => {
-    fetch('"http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allDeposits',
+    fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allDeposits',
     {
       method:"POST",
       mode: 'cors',
@@ -82,7 +82,7 @@ const [sampleItems, setSampleItems] = useState({
     })
     .catch(error => console.log(error));
 
-    fetch('"http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allSamples',
+    fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allSamples',
     {
       method:"POST",
       mode: 'cors',
@@ -96,7 +96,7 @@ const [sampleItems, setSampleItems] = useState({
     })
     .catch(error => console.log(error));
 
-    fetch('"http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allSales',
+    fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allSales',
     {
       method:"POST",
       mode: 'cors',

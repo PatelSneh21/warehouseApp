@@ -15,9 +15,7 @@ function TopBar() {
       localStorage.clear();
       window.location.href = '/';
     }
-
-
-
+    
   return (
     <div className='topbar-wrapper'>
 
@@ -31,22 +29,15 @@ function TopBar() {
         <Dropdown>
           <Dropdown.Toggle variant="" id="">
             {/* <FaBell className='user-icon' /> */}
-            <FaUserCircle className='user-icon' /> {state.user.email}
+            <FaUserCircle className='user-icon' /> {state.username}
           </Dropdown.Toggle>
 
           <Dropdown.Menu >
             <Dropdown.Item onClick={logout}>Log Out</Dropdown.Item>
           </Dropdown.Menu>
         </Dropdown>
-        </div>
-
-        
+        </div>    
     </div>
-
-
-        
-
-
     </div>
   )
 }

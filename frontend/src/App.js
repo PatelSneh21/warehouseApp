@@ -11,9 +11,8 @@ import "./App.css"
 
 function App() {
 
-  const [user, setUser] = useState({name: "", email: ""});
+  const [user, setUser] = useState({username: "", isAdmin: false});
   const [error, setError] = useState("");
-
 
   //login function
   const Login = details => {
@@ -22,41 +21,43 @@ function App() {
       "password" : details.password,
       "rememberMe": true
     }
-    console.log(userinfo);
-    
-    fetch("http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/login", {
+
+    fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/login',
+    {
       method:"POST",
       mode: 'cors',
       headers:{
           "Content-Type":"application/json",
       },
       body: JSON.stringify(userinfo)
-    }).then(response => {
-      if ( response.ok ){
-        console.log(user)
-        //console.log("Logged in");
+    })
+    .then( async (response) => {
+
+      // get json response here
+      let data = await response.json();
+      
+      if(response.ok ){
+
         setUser({
-          email: details.email
+          username: details.email,
+          isAdmin: data["isAdmin"]
         })
-        console.log(user)
-      } else {
-        console.log("Details do not match.");
+      }else{
         setError("Details do not match");
       }
-    });
-
+    })
+    .catch((err) => {
+        console.log(err);
+    })
   }
 
   let navigate = useNavigate();
 
   return (
     <div className="App">
-      {(user.email != "") ? (
+      {(user.username != "") ? (
         <div className="welcome">
-          {/* <Home user = {user} /> */}
-          {navigate("/home", {state: {user: user}})}
-          
-
+          {navigate("/home", {state: user})}
         </div>
       ) : (
         <LoginForm Login={Login} error={error}/>

@@ -15,7 +15,23 @@ import { Col, Row, Form, Table, Button } from "react-bootstrap";
 function InventoryPage() {
 
   function handleEdit(props) {
-    console.log("delete clicked" + props.item["Item ID"]);
+    setIsEditing(true);
+    setEditItem({
+      item_id: props.item["Item ID"],
+      item_name: props.item["Item Name"],
+      model_number: props.item["Item Model Num"],
+      item_price: props.item["Item Price"],
+      quantity: props.item["Item Quantity"],
+      minQuantity: props.item["Minimum Quantity"],
+    })
+    //console.log("delete clicked" + props.item["Item ID"]);
+  }
+
+  function handleCloseEdit() {
+    setIsEditing(false);
+    setSucess("")
+    setError("")
+    setEditItem({item_id:"",item_name:"", model_number:"", item_price:'', quantity:"", minQuantity: ""});
   }
   
   const Item = (props) => (
@@ -31,11 +47,13 @@ function InventoryPage() {
         onClick={() => handleBins(props)}
         >Bins</Button>
       </td>
+      {state.isAdmin && 
       <td>
-        <Button variant="primary"
-        onClick={() => handleEdit(props)}
-        >edit</Button>
-      </td>
+      <Button variant="primary"
+      onClick={() => handleEdit(props)}
+      >Edit</Button>
+      </td>}
+      
       {/* <td>
         <Button variant="primary"
         onClick={() => handleDelete(props)}>delete</Button>
@@ -58,17 +76,26 @@ function InventoryPage() {
     {item_name:"12mm Fitting", model_number:"asdfa66", quantity:"378", minQuantity: "1"}]
   });
 
+  const [editItem, setEditItem] = useState(
+    {item_id:"",item_name:"", model_number:"", item_price:'', quantity:"", minQuantity: ""});
+
   const [findBins, setFindBins] = useState({
     bins: [{bin_location: "", rack_location:"", num_cartons:""}]
   });
 
   const [currentItem, setCurrentItem] = useState("");
 
+  const [isEditing, setIsEditing] = useState(false);
+
+  const [error, setError] = useState("");
+  const [success, setSucess] = useState("");
+
+  const [newEdit, setNewEdit] = useState(false);
 
   const {state} = useLocation();
 
   let userData = {
-    "username" : state.user.email
+    "username" : state.username
   }
 
   /*
@@ -85,7 +112,7 @@ function InventoryPage() {
       .then(data => setInvItems({items: data.items}))
       .catch(error => console.log(error));
     } else {
-      fetch('http://127.0.0.1:5000/api/allItems',
+      fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allItems',
         {
           method:"POST",
           mode: 'cors',
@@ -121,6 +148,23 @@ function InventoryPage() {
    
     }, []);
 
+    useEffect(() => {
+      fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allItems',
+      {
+        method:"POST",
+        mode: 'cors',
+        headers:{
+            "Content-Type":"application/json",
+        },
+        body: JSON.stringify(userData)
+      }).then(response => response.json())  
+      .then(data => {
+        setInvItems({items: data.items});
+        //console.log(data.items)
+      })
+      .catch(error => console.log(error));
+  }, [newEdit]);
+
   // This method will map out the recent sales onto the table
   function itemList(collection) {
     //console.log(collection)
@@ -150,7 +194,7 @@ function InventoryPage() {
   function handleBins(props) {
     // console.log("Locate bins for " + props.item["Item Name"]);
 
-    fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/searchBin/' + props.item['Item ID'])
+    fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/searchBin/' + props.item['Item ID'])
       .then(response => response.json())  
       .then(data => {
         setFindBins({bins: data.bins});
@@ -158,19 +202,47 @@ function InventoryPage() {
         //console.log(data.items)
         })
         .catch(error => console.log(error));
-  
-    // fetch locateBins
-    // input only item id
-    // search deposit and withdraw and samples
-    // if Deposit.item_id == item_id
-    //    then item[bin_id] += numcartons
-    // if withdraw and sales itemid == item id
-    //   then item[bin_id] -= numcartons
-    // for each bin_id
-    // bin_id: numcartons
-    // search bin_id to get bin_location
-    // bin_location: num cartons
   }
+
+  // These methods will update the state properties on edit card.
+  const handleChange = (e) => {
+    // setSucess("")
+    // setError('')
+    const item = e.target.name;
+    const value = e.target.value;
+    setEditItem(values => ({...values, [item]:value}))
+    //console.log(editItem)
+  }
+
+  // This function will handle the submission.
+  function onSubmit(e) {
+    e.preventDefault();
+
+    fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/editItemInfo',
+    {
+      method:"POST",
+      mode: 'cors',
+      headers:{
+          "Content-Type":"application/json",
+      },
+      body: JSON.stringify(editItem)
+    }).then(response => {
+        if ( response.ok ){
+            // setEditItem({
+            //   item_id:"",
+            //   item_name: "",
+            //   model_number: "",
+            //   item_price:"",
+            //   quantity: "",
+            //   minQuantity: ""
+            // });
+            setSucess("Item successfully edited");
+            setNewEdit(!newEdit)
+        } else {
+          setError("Error editing item, please try again");
+        }
+    });
+}
 
 
   return (
@@ -181,6 +253,75 @@ function InventoryPage() {
           <input className='search-bar' type="text" placeholder="Search for an item, model num, etc" 
           onChange={event => setSearchTerm(event.target.value)} value={searchTerm}/>
         </div>
+
+        {isEditing && 
+        <div className="result-card">
+          <h3>Edit</h3>
+          <form onSubmit={onSubmit}>
+            <div className="form-group">
+              <label>Item name: </label>
+              <input
+                type="text"
+                className="form-control"
+                name = "item_name"
+                value={editItem.item_name}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Model number: </label>
+              <input
+                type="text"
+                className="form-control"
+                name = "model_number"
+                value={editItem.model_number}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Item price: </label>
+              <input
+                type="number"
+                className="form-control"
+                name = "item_price"
+                value={editItem.item_price}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Item quantity: </label>
+              <input
+                type="number"
+                className="form-control"
+                name = "quantity"
+                value={editItem.quantity}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-group">
+              <label>Minimum quantity before reorder alert: </label>
+              <input
+                type="number"
+                className="form-control"
+                name = "minQuantity"
+                value={editItem.minQuantity}
+                onChange={handleChange}
+              />
+            </div>
+            {(success != "") ? ( <div className="successMsg">{success}</div>) : ""}
+            {(error != "") ? ( <div className="error">{error}</div>) : ""}
+            <div className="form-group">
+            <button id="Submit" name="Submit" class="btn btn-primary">Submit</button>
+            </div>
+            <Button variant="primary"
+            onClick={() => handleCloseEdit()}
+            >Close</Button>
+          </form>
+        </div>
+        }
 
           {currentItem !== "" && 
               <div className='result-card'>
@@ -213,7 +354,8 @@ function InventoryPage() {
                   <th className="invtable-minquantity">Minimum Quantity (items)</th>
                   {/* <th className="invtable-info">Additional Information</th> */}
                   <th className="invtable-info">Locate Bins</th>
-                  <th className="invtable-info">Actions</th>
+                  {state.isAdmin && <th className="invtable-info">Actions</th>}
+                  
                 </tr>
             </thead>
             <tbody>{itemList(invItems)}</tbody>

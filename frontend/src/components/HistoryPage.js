@@ -46,7 +46,7 @@ function HistoryPage() {
   const {state} = useLocation();
 
   let userData = {
-    "username" : state.user.email
+    "username" : state.username
   }
 
   const [DepositItems, setDepositItems] = useState({
@@ -148,24 +148,88 @@ function sampleList(collection) {
   }
 
 
+    /*
+    search functionality
+  */
+    const [searchTerm, setSearchTerm] = useState("");
+
+    useEffect(() => {
+      if (searchTerm !== "") {
+        fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/searchDeposits/' + searchTerm)
+        .then(response => response.json())  
+        .then(data => {
+          setDepositItems({items: data.items});
+        })
+        .catch(error => console.log(error));
+
+        fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/searchSamples/' + searchTerm)
+        .then(response => response.json())  
+        .then(data => {
+          setSampleItems({items: data.items});
+        })
+        .catch(error => console.log(error));
+
+        fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/searchSales/' + searchTerm)
+        .then(response => response.json())  
+        .then(data => {
+          setSalesItems({items: data.items});
+        })
+        .catch(error => console.log(error));
+    
+      } else {
+        fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allDeposits',
+        {
+          method:"POST",
+          mode: 'cors',
+          headers:{
+              "Content-Type":"application/json",
+          },
+          body: JSON.stringify(userData)
+        }).then(response => response.json())  
+        .then(data => {
+          setDepositItems({items: data.items});
+        })
+        .catch(error => console.log(error));
+
+        fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allSamples',
+        {
+          method:"POST",
+          mode: 'cors',
+          headers:{
+              "Content-Type":"application/json",
+          },
+          body: JSON.stringify(userData)
+        }).then(response => response.json())  
+        .then(data => {
+          setSampleItems({items: data.items});
+        })
+        .catch(error => console.log(error));
+
+        fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/allSales',
+        {
+          method:"POST",
+          mode: 'cors',
+          headers:{
+              "Content-Type":"application/json",
+          },
+          body: JSON.stringify(userData)
+        }).then(response => response.json())  
+        .then(data => {
+          setSalesItems({items: data.items});
+        })
+        .catch(error => console.log(error));
+    
+      }
+    }, [searchTerm]);
+
+
 return (
   <div className='inventory-wrapper'>
       <h2>Transaction History</h2>
       <div className='search-card'>
         <h5>What are you looking for?</h5>
-        <Form>
-          <Row>
-            <Col xs={10}>
-              <Form.Control placeholder="Search for an item, model num, etc" />
-            </Col>
-            <Col>
-              
-            </Col>
-            <Col>
-            <Button type="Submit">Submit</Button>
-            </Col>
-          </Row>
-        </Form>
+        <input className='search-bar' type="text" placeholder="Search for an item, model num, etc" 
+          onChange={event => setSearchTerm(event.target.value)} value={searchTerm}/>
       </div>
 
       <div className="result-card">

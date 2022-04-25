@@ -227,8 +227,7 @@ def login():
 		if check_password_hash(user.user_password, password + salt):
 			session.permanent = sessionPermanance			 		
 			session["username"] = user.user_username
-			return Response(status = 200) #Redirect to dashboard
-			
+			return {"isAdmin": user.user_type == "Admin"}, 200
 
 		return Response(status = 404) #Incorrect Password
 
@@ -290,7 +289,7 @@ def logout():
 @app.route('/api/isLoggedIn', methods = ['GET'])
 def isLoggedIn():
 	user = {}
-	print(session)
+	# print(session)
 	if ("username" in session):
 		current_user = Users.query.filter_by(user_username = session["username"]).first()
 		user = {
@@ -479,14 +478,11 @@ def allCartons():
 # Expected Response: HTTP Status 200
 @app.route('/api/checkPrivilages', methods = ['POST'])
 def checkPrivilages(): 
-    user = request.json["username"]
-
-    current_user = Users.query.filter_by(user_username = user).first()
-
-    if (current_user.user_type != "Admin"):
-        return {"isAdmin" : False}
-    else: 
-        return {"isAdmin" : True}
+	user = request.json["username"]
+	
+	current_user = Users.query.filter_by(user_username = user).first()
+	
+	return {"isAdmin": current_user.user_type == "Admin"}, 200
 
 
 # Route: /api/admin/allDeposits, Get a list of all deposits
@@ -574,7 +570,7 @@ def allSales():
 	}, 200
 
 
-# Route: /api/admin/allSales, Get a list of all samples taken out
+# Route: /api/addTransaction, Add a deposit, sale or sample to all corrresponding tables
 # Method: POST (needed to verify user)
 # Expected Response: HTTP Status 200
 
@@ -654,6 +650,84 @@ def searchItem(query):
 	return {
         "items" : items
     }, 200
+
+# Route: /api/searchDeposit/<query>, Returns all items that match the model_number or item_name
+# Method: GET
+# Param: query
+# Expected Response: HTTP Status 200
+@app.route('/api/searchDeposits/<query>')
+def searchDeposit(query):
+	query = query.lower()
+	items = []
+
+	for item in db.session.query(Deposits, Items, Bin, Rack).join(Items, Deposits.item_id == Items.item_id).join(Bin, Deposits.bin_info_bin_id == Bin.bin_id).join(Rack, Deposits.rack_info_rack_id == Rack.rack_id):
+		if (query in str(item[1].model_number).lower() or query in str(item[0].deposit_date) or query in str(item[1].item_name).lower() or query in str(item[2].bin_location).lower()):
+			items.append({
+                'deposit_id': item[0].deposit_id,
+				'deposit_date' : item[0].deposit_date,
+				'num_cartons': item[0].num_cartons,
+				'item_name' : item[1].item_name,
+				'model_number' : item[1].model_number,
+				'bin_location' : item[2].bin_location,
+				'rack_location' : item[3].rack_location,
+				})
+	return {
+        "items" : items
+    }, 200
+
+
+# Route: /api/searchSample/<query>, Returns all items that match the model_number or item_name
+# Method: GET
+# Param: query
+# Expected Response: HTTP Status 200
+@app.route('/api/searchSamples/<query>')
+def searchSample(query):
+	query = query.lower()
+	items = []
+
+	for item in db.session.query(Samples, Items, Bin, Rack, Users).join(Items, Samples.items_item_id == Items.item_id).join(Bin, Samples.bin_info_bin_id == Bin.bin_id).join(Rack, Samples.rack_info_rack_id == Rack.rack_id).join(Users, Samples.users_user_id == Users.user_id):		
+		if (query in str(item[1].model_number).lower() or query in str(item[0].withdraw_date) or query in str(item[1].item_name).lower() or query in str(item[2].bin_location).lower()):
+			items.append({
+			'sample_id': item[0].sample_id,
+			'withdraw_date' : item[0].withdraw_date,
+			'num_cartons': item[0].item_amount,
+			'item_name' : item[1].item_name,
+			'model_number' : item[1].model_number,
+			'bin_location' : item[2].bin_location,
+			'rack_location' : item[3].rack_location,
+			'user': item[4].user_username
+			})
+	return {
+        "items" : items
+    }, 200
+
+
+# Route: /api/searchSales/<query>, Returns all items that match the model_number or item_name
+# Method: GET
+# Param: query
+# Expected Response: HTTP Status 200
+@app.route('/api/searchSales/<query>')
+def searchSales(query):
+	query = query.lower()
+	items = []
+	for item in db.session.query(Sales, Items, Bin, Rack, Customers).join(Items, Sales.items_item_id == Items.item_id).join(Bin, Sales.bin_info_bin_id == Bin.bin_id).join(Rack, Sales.rack_info_rack_id == Rack.rack_id).join(Customers, Sales.customers_customer_id == Customers.customer_id):
+		if (query in str(item[1].model_number).lower() or query in str(item[0].transaction_date) or query in str(item[1].item_name).lower() or query in str(item[2].bin_location).lower()):
+			items.append({
+			'transaction_id': item[0].transaction_id,
+			'transaction_date' : item[0].transaction_date,
+			'num_cartons': item[0].item_amount,
+			'tax_collected': item[0].tax_collected,
+			'revenue': item[0].revenue,
+			'item_name' : item[1].item_name,
+			'model_number' : item[1].model_number,
+			'bin_location' : item[2].bin_location,
+			'rack_location' : item[3].rack_location,
+			'customer_name': item[4].customer_name
+			})
+	return {
+        "items" : items
+    }, 200
+
 
 # Route: /api/searchBin/<query>, Returns all bins that match any attribute
 # Method: GET
@@ -917,37 +991,41 @@ def transactionHistoryDates():
 #	item_price: Integer
 #	quantity: Integer
 # Expected Response: HTTP Status 200
-@app.route('/api/admin/editItemInfo', methods = ['POST'])
+@app.route('/api/editItemInfo', methods = ['POST'])
 def editItemInfo(): 
-	if ("username" in session):
-		current_user = Users.query.filter_by(user_username = session["username"]).first()
+	
+	itemToUpdate = Items.query.filter_by(item_id = request.json["item_id"]).first() 
+	itemToUpdate.item_name = request.json['item_name']
+	itemToUpdate.model_number = request.json["model_number"]
+	itemToUpdate.item_price = request.json["item_price"]
+	itemToUpdate.quantity = request.json["quantity"]
+	itemToUpdate.minQuantity = request.json["minQuantity"]
+	db.session.merge(itemToUpdate)
+	db.session.flush()
+	db.session.commit()
 
-		if (current_user.user_type != "Admin"): #Ensure only admins 
-			return Response(status=404)
+	updatedItemInfo = {
+		"item_name": itemToUpdate.item_name,
+		"model_number" : itemToUpdate.model_number,
+		"item_price" : itemToUpdate.item_price,
+		"quantity" : itemToUpdate.quantity,
+		"minQuantity": itemToUpdate.minQuantity
+		}
 
-		else: 
-			itemToUpdate = Items.query.filter_by(item_id = request.json["item_id"]).first() 
-			itemToUpdate.item_name = request.json['item_name']
-			itemToUpdate.model_number = request.json["model_number"]
-			itemToUpdate.item_price = request.json["item_price"]
-			itemToUpdate.quantity = request.json["quantity"]
-			db.session.merge(itemToUpdate)
-			db.session.flush()
-			db.session.commit()
+	return {
+		"updatedItemInfo" : updatedItemInfo
+		}, 200 #Item properly updated!
+	# if ("username" in session):
+	# 	current_user = Users.query.filter_by(user_username = session["username"]).first()
 
-			updatedItemInfo = {
-				"item_name": itemToUpdate.item_name,
-				"model_number" : itemToUpdate.model_number,
-				"price" : itemToUpdate.price,
-				"quantity" : itemToUpdate.quantity
-				}
+	# 	if (current_user.user_type != "Admin"): #Ensure only admins 
+	# 		return Response(status=404)
 
-			return {
-				"updatedItemInfo" : updatedItemInfo
-				}, 200 #Item properly updated!
+	# 	else: 
+			
 
-	else:
-		return Response(status=404)
+	# else:
+	# 	return Response(status=404)
 
 
 # Route: /api/admin/editMasterCarton, Edit the info for an existing MC in the database

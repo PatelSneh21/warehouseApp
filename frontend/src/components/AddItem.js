@@ -40,7 +40,7 @@ function AddItem() {
       const navigate = useNavigate();
       const {state} = useLocation();
       const handleBack = () => {
-        navigate('../manage', {replace:true, state: state})
+        navigate('../manage', {state: state})
       }
 
 // This function will handle the submission.

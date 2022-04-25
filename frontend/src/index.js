@@ -29,7 +29,6 @@ ReactDOM.render(
     <Routes>
       <Route path="/" element={<App />} />
 
-
       <Route path="home" element={<Home />}>
         <Route index element={<HomeContent />} />
         <Route path="history" element={<HistoryPage />} />
@@ -44,9 +43,6 @@ ReactDOM.render(
         <Route path="manage" element={<ManageWarehouse />} />
       </Route>
 
-      {/* <Route path="home" element={<Home />} />
-      <Route path="history" element={<HistorySummary />} />
-      <Route path="sales" element={<SalesSummary />} /> */}
     </Routes>
   </BrowserRouter>,
   document.getElementById('root')

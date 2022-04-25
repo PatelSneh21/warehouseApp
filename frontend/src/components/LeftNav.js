@@ -14,27 +14,11 @@ function LeftNav(props) {
     
 
     let userData = {
-        "username" : state.user.email
+        "username" : state.username
     }
 
-    const [isAdmin, setAdmin] = useState(false);
-
-    useEffect(() => {
-        fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/checkPrivilages',
-        {
-          method:"POST",
-          mode: 'cors',
-          headers:{
-              "Content-Type":"application/json",
-          },
-          body: JSON.stringify(userData)
-        }).then(response => response.json())  
-        .then(data => {
-           setAdmin(data.isAdmin);
-        //setAdmin(true);
-        })
-        .catch(error => console.log(error));
-    }, []);
+    const isAdmin = state.isAdmin;
+    //const [isAdmin, setAdmin] = useState(false);
 
 
     return (
@@ -42,19 +26,19 @@ function LeftNav(props) {
             <h3 className="navTitle">BlueVue</h3>
             <div className='left-inner'>
                     <nav>
-                        <NavLink className={(navData) => (navData.isActive ? "navItem-active" : 'navItem')} end to="/home" state={{user:state.user}}>
+                        <NavLink className={(navData) => (navData.isActive ? "navItem-active" : 'navItem')} end to="/home" state={state}>
                             <FaHome className='icon' /> Home
                         </NavLink> 
-                        <NavLink className={(navData) => (navData.isActive ? "navItem-active" : 'navItem')} end to="/home/inventory" state={{user:state.user}}>
+                        <NavLink className={(navData) => (navData.isActive ? "navItem-active" : 'navItem')} end to="/home/inventory" state={state}>
                             <FaClipboardList className='icon' />Inventory
                         </NavLink> 
-                        <NavLink className={(navData) => (navData.isActive ? "navItem-active" : 'navItem')} end to="/home/history" state={{user:state.user}}>
+                        <NavLink className={(navData) => (navData.isActive ? "navItem-active" : 'navItem')} end to="/home/history" state={state}>
                             <FaHistory className='icon'/> History</NavLink>
-                        <NavLink className={(navData) => (navData.isActive ? "navItem-active" : 'navItem')} end to="/home/addItem" state={{user:state.user}}>
+                        <NavLink className={(navData) => (navData.isActive ? "navItem-active" : 'navItem')} end to="/home/addItem" state={state}>
                             <FaPlus className='icon'/> New Transaction</NavLink>
 
                         {isAdmin &&
-                        <NavLink className={(navData) => (navData.isActive ? "navItem-active" : 'navItem')} end to="/home/manage" state={{user:state.user}}>
+                        <NavLink className={(navData) => (navData.isActive ? "navItem-active" : 'navItem')} end to="/home/manage" state={state}>
                             <FaWrench className='icon'/> Manage</NavLink>
                         }
                         

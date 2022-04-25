@@ -7,7 +7,7 @@ function AddTransaction() {
   const {state} = useLocation();
 
   let userData = {
-    "username" : state.user.email
+    "username" : state.username
   }
 
     const [invItem, setInvItem] = useState({
@@ -56,7 +56,7 @@ function AddTransaction() {
     function onSubmit(e) {
         e.preventDefault();
         console.log(invItem)
-        fetch('"http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/addTransaction',
+        fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/addTransaction',
         {
           method:"POST",
           mode: 'cors',
@@ -203,7 +203,6 @@ function AddTransaction() {
 
             </div>
         </div>
-        
       )
 }
 

@@ -37,7 +37,7 @@ function ManageCartons() {
     const [success, setSucess] = useState("");
     const {state} = useLocation();
     let userData = {
-        "username" : state.user.email
+        "username" : state.username
     }
     const navigate = useNavigate();
 

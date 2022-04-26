@@ -13,8 +13,8 @@ To install dependencies for react frontend:
 `npm install`
 
 To start flask app:
-export FLASK_APP=app.py
-sudo flask run
+`export FLASK_APP=app.py`
+`sudo flask run`
 
 
 To start frontend:

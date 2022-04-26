@@ -395,4 +395,13 @@ html {
   padding-bottom:40px;
  }
 
+ .widgettitle {
+   color: rgb(36, 105, 255);
+   padding-left:10px;
+ }
+
+ .halfheightcard {
+   padding-left: 40px;  
+   height: 150px;
+ }
 /* End widget styling */

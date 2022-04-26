@@ -618,6 +618,24 @@ def purchaseWidget():
 	}, 200
 
 
+# Route: /api/revenueWidget, get the revenue of the past 30 days
+# Method: GET
+# Expected Response: HTTP Status 200
+
+@app.route('/api/revenueWidget')
+def revenueWidget(): 
+	total = 0
+	beginDate = datetime.now().date() - relativedelta(months = 1)
+	for item in Sales.query.all():
+		revenue = item.revenue
+		curDate = item.transaction_date
+		if curDate >= beginDate:
+			total = total + revenue
+	return {
+		"revenue" : total
+	}, 200
+
+
 # Route: /api/addTransaction, Add a deposit, sale or sample to all corrresponding tables
 # Method: POST (needed to verify user)
 # Expected Response: HTTP Status 200

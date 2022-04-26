@@ -113,6 +113,7 @@ function ManageRacks() {
         })
         .catch((err) => {
             console.log(err);
+            setError("Error adding rack, please try again");
         })
     }
 

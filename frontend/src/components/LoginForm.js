@@ -17,14 +17,14 @@ function LoginForm({ Login, error }) {
             <div className="form-inner">
                 <img src={Logo} />
                 <div className="form-group">
-                    <label htmlFor="email">Email:</label>
+                    <label htmlFor="email">Username:</label>
                     <input type="text" name="email" id="email" onChange={event => setDetails({...details, email: event.target.value})} value={details.email}/>
                 </div>
                 <div className="form-group">
                     <label htmlFor="password">Password:</label>
                     <input type="password" name="password" id="password" onChange={event => setDetails({...details, password: event.target.value})} value={details.password}/>
                 </div>
-            {(error != "") ? ( <div className="error">Incorrect username or pass</div>) : ""}
+            {(error != "") ? ( <div className="error">Incorrect username or password</div>) : ""}
                 <input type="submit" value="LOGIN"/>
             </div>
         </form>

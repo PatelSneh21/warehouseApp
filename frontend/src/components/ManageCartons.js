@@ -192,7 +192,8 @@ function ManageCartons() {
           }
         })
         .catch((err) => {
-            console.log(err);
+          setError("Error adding master carton, please try again");
+          console.log(err);
         })
         }
     }

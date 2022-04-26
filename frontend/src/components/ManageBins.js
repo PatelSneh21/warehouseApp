@@ -127,6 +127,7 @@ function ManageBins() {
         })
         .catch((err) => {
             console.log(err);
+            setError("Error adding bin, please try again");
         })
     }
     

@@ -82,7 +82,10 @@ function AddTransaction() {
             } else {
               setError("Error adding item, please try again");
             }
-        });
+        }).catch((err) => {
+          console.log(err);
+          setError("Error adding bin, please try again");
+      });
     }
 
     

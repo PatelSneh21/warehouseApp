@@ -109,6 +109,7 @@ function ManageCustomers() {
         })
         .catch((err) => {
             console.log(err);
+            setError("Error adding customer, please try again");
         })
     }
 

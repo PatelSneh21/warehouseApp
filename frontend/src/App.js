@@ -47,7 +47,8 @@ function App() {
       }
     })
     .catch((err) => {
-        console.log(err);
+      setError("Details do not match");
+        //console.log(err);
     })
   }
 

@@ -129,7 +129,8 @@ function ManageUsers() {
           }
         })
         .catch((err) => {
-            console.log(err);
+          setError("Error adding user, please try again");
+          console.log(err);
         })
     }
 

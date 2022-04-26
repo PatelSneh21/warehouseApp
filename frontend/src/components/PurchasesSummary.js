@@ -13,7 +13,7 @@ function PurchasesSummary() {
 });
 
   useEffect(() => {
-    fetch('http://http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/purchaseWidget')
+    fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/purchaseWidget')
     .then(response => response.json())  
     .then(data => {
         setItems({items: data.items});

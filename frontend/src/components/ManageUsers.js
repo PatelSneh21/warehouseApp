@@ -26,7 +26,7 @@ function ManageUsers() {
     const [newUser, setNewUser] = useState({
         user_username:"",
         user_name: "",
-        user_type: "",
+        user_type: "Employee",
         user_password:""
     });
 
@@ -36,7 +36,7 @@ function ManageUsers() {
     const [success, setSucess] = useState("");
     const {state} = useLocation();
     let userData = {
-      "username" : state.username
+        "username" : state.username
     }
     const navigate = useNavigate();
 
@@ -72,6 +72,7 @@ function ManageUsers() {
         setError("")
         const newFormType = e.target.value;
         setNewUser(values => ({...values, ['user_type']:newFormType}))
+        console.log(newUser)
     }
 
     // back button
@@ -96,6 +97,7 @@ function ManageUsers() {
     // When submit button pressed add the new user into the database
     // Then get the updated user list and display it
     function onSubmit(e) {
+      console.log(newUser)
         e.preventDefault();
 
         fetch('http://ec2-54-83-68-204.compute-1.amazonaws.com:5000/api/signup',
@@ -117,7 +119,7 @@ function ManageUsers() {
             setNewUser({
                 user_username:"",
                 user_name: "",
-                user_type: "",
+                user_type: "Employee",
                 user_password:""
             });
 

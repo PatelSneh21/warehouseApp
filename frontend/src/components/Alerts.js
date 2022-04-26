@@ -47,7 +47,7 @@ function Alerts() {
     <div className='home-card widgetcard'>
       <h2>Alerts</h2>
       {hasAlerts && 
-      <p>Low Inventory</p>
+      <p style={{color:'red'}}> Low Inventory</p>
       }
       <Table striped borderless hover >
       <thead>

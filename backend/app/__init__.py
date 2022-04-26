@@ -166,21 +166,22 @@ def getAllBelowMinQuantity():
 # Expected Response: User added to database, user added to session, status code 202 (Created object)
 @app.route('/api/signup', methods =['POST'])
 def signup():
-	user_username = request.json['user_username']
-	user_name = request.json['user_name']
-	user_type = request.json['user_type']
-	user_password = request.json['user_password']
+	username = request.json["user_username"]
+	username = username.lower() #Data cleaning
+	name = request.json["user_name"]
+	userType = request.json["user_type"]
+	password = request.json["user_password"]
+	password_hashed = generate_password_hash(password + salt, method = 'sha256')
 
 	#Input validations to check the data received from the frontend, for the time being generic error 404 is being returned
-	if (user_name == "" or user_username == "" or user_type == "" or user_password == ""): #No field can be left blank
+	if (name == "" or userType == "" or username == "" or password == ""): #No field can be left blank
 		return Response(status=404)
 	
-	if (Users.query.filter_by(user_username = user_username).first() is not None): #Ensures there is no other user with the same username
-		return Response(status = 404) #Username already exists
+	if (Users.query.filter_by(user_username = username).first() is None): #Ensures there is no other user with the same username
+		newUser = Users(user_username = username, user_password = password_hashed, user_name = name, user_type = userType)
+		db.session.add(newUser)
+		db.session.commit()
 
-	newUser = Users(user_username = user_username, user_name = user_name, user_password = user_password, user_type = user_type)
-	db.session.add(newUser)
-	db.session.commit()
 
 	users = []
 	for user in Users.query.all():
@@ -193,8 +194,6 @@ def signup():
 	return {
 		"users" : users
 	}, 200
-
-	#Handles being POSTed user data from the form
 
 
 # Route: /api/login, Used to login an existing user 
